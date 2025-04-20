@@ -9,10 +9,10 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
-	"PeoplePilot/backend"
-	"PeoplePilot/backend/db"
-	"PeoplePilot/backend/repository"
-	"PeoplePilot/backend/utils"
+	"StockFlow/backend"
+	"StockFlow/backend/db"
+	"StockFlow/backend/repository"
+	"StockFlow/backend/utils"
 )
 
 func main() {

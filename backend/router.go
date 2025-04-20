@@ -1,13 +1,13 @@
 package backend
 
 import (
-	"PeoplePilot/backend/db"
-	"PeoplePilot/backend/handler"
-	"PeoplePilot/backend/middleware"
-	"PeoplePilot/backend/model"
-	"PeoplePilot/backend/repository"
-	"PeoplePilot/backend/service"
-	"PeoplePilot/backend/utils"
+	"StockFlow/backend/db"
+	"StockFlow/backend/handler"
+	"StockFlow/backend/middleware"
+	"StockFlow/backend/model"
+	"StockFlow/backend/repository"
+	"StockFlow/backend/service"
+	"StockFlow/backend/utils"
 	"fmt"
 	"net/http"
 	"time"

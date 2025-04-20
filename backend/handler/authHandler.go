@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"time"
 
-	"PeoplePilot/backend/model"
-	"PeoplePilot/backend/repository"
-	"PeoplePilot/backend/utils"
+	"StockFlow/backend/model"
+	"StockFlow/backend/repository"
+	"StockFlow/backend/utils"
 
 	"github.com/gin-gonic/gin"
 )

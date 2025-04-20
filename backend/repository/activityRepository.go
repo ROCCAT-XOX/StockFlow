@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"PeoplePilot/backend/db"
-	"PeoplePilot/backend/model"
+	"StockFlow/backend/db"
+	"StockFlow/backend/model"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

@@ -1,9 +1,9 @@
 package middleware
 
 import (
-	"PeoplePilot/backend/model"
-	"PeoplePilot/backend/repository"
-	"PeoplePilot/backend/utils"
+	"StockFlow/backend/model"
+	"StockFlow/backend/repository"
+	"StockFlow/backend/utils"
 	"errors"
 	"net/http"
 	"strings"

@@ -1,7 +1,7 @@
 package service
 
 import (
-	"PeoplePilot/backend/model"
+	"StockFlow/backend/model"
 	"time"
 )
 
