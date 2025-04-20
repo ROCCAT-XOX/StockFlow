@@ -26,6 +26,11 @@ func main() {
 	}
 	defer db.DisconnectDB()
 
+	initRepo := repository.NewInitRepository()
+	if err := initRepo.InitializeDatabase(); err != nil {
+		log.Printf("Warnung: Datenbank konnte nicht vollständig initialisiert werden: %v", err)
+	}
+
 	// Admin-Benutzer erstellen, falls keiner existiert
 	userRepo := repository.NewUserRepository()
 	if err := userRepo.CreateAdminUserIfNotExists(); err != nil {

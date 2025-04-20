@@ -7,14 +7,9 @@
                     <h1 class="text-xl font-semibold text-green-600">StockFlow</h1>
                 </div>
                 <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-                    <!-- Current: "border-green-500 text-gray-900", Default: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" -->
                     <a href="/dashboard" class="inline-flex items-center border-b-2 {{ if eq .active "dashboard" }}border-green-500 text-gray-900{{ else }}border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700{{ end }} px-1 pt-1 text-sm font-medium">Dashboard</a>
 
-                    <!-- Zeige Mitarbeiter-Tab für alle Rollen außer einfachen Benutzern -->
-                    {{ if ne .userRole "user" }}
-                    <a href="/employees" class="inline-flex items-center border-b-2 {{ if eq .active "employees" }}border-green-500 text-gray-900{{ else }}border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700{{ end }} px-1 pt-1 text-sm font-medium">Mitarbeiter</a>
-                    {{ end }}
-
+                    <a href="/articles" class="inline-flex items-center border-b-2 {{ if eq .active "articles" }}border-green-500 text-gray-900{{ else }}border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700{{ end }} px-1 pt-1 text-sm font-medium">Artikel</a>
                 </div>
             </div>
             <div class="hidden sm:ml-6 sm:flex sm:items-center">
@@ -74,12 +69,7 @@
         <div class="space-y-1 pt-2 pb-3">
             <a href="/dashboard" class="block border-l-4 {{ if eq .active "dashboard" }}border-green-500 bg-green-50 text-green-700{{ else }}border-transparent text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700{{ end }} py-2 pl-3 pr-4 text-base font-medium">Dashboard</a>
 
-            <!-- Nur für Benutzer außer "user" -->
-            {{ if ne .userRole "user" }}
-            <a href="/employees" class="block border-l-4 {{ if eq .active "employees" }}border-green-500 bg-green-50 text-green-700{{ else }}border-transparent text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700{{ end }} py-2 pl-3 pr-4 text-base font-medium">Mitarbeiter</a>
-            {{ end }}
-
-
+            <a href="/articles" class="block border-l-4 {{ if eq .active "articles" }}border-green-500 bg-green-50 text-green-700{{ else }}border-transparent text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700{{ end }} py-2 pl-3 pr-4 text-base font-medium">Artikel</a>
         </div>
         <div class="border-t border-gray-200 pt-4 pb-3">
             <div class="flex items-center px-4">

@@ -245,6 +245,35 @@ func InitializeRoutes(router *gin.Engine) {
 			// Formatieren der monatlichen Personalkosten
 			formattedLaborCosts := fmt.Sprintf("%.2f", monthlyLaborCosts)
 
+			articleRepo := repository.NewArticleRepository()
+			allArticles, err := articleRepo.FindAll()
+			if err != nil {
+				allArticles = []*model.Article{} // Leere Liste im Fehlerfall
+			}
+
+			totalArticles := len(allArticles)
+			// Werte für das Dashboard berechnen
+			var totalStock float64
+			var totalStockValue float64
+			var lowStockCount int
+			var totalCategories = make(map[string]bool)
+
+			for _, article := range allArticles {
+				totalStock += article.StockCurrent
+				totalStockValue += article.StockCurrent * article.PurchasePriceNet
+
+				if article.StockCurrent < article.MinimumStock && article.MinimumStock > 0 {
+					lowStockCount++
+				}
+
+				if article.Category != "" {
+					totalCategories[article.Category] = true
+				}
+			}
+
+			// Kategorien zählen
+			categoryCount := len(totalCategories)
+
 			// Daten an das Template übergeben
 			c.HTML(http.StatusOK, "dashboard.html", gin.H{
 				"title":                   "Dashboard",
@@ -267,6 +296,11 @@ func InitializeRoutes(router *gin.Engine) {
 				"deptCostsData":           deptCostsData,
 				"ageGroups":               ageGroups,
 				"ageCounts":               ageCounts,
+				"totalArticles":           totalArticles,
+				"totalStock":              totalStock,
+				"totalStockValue":         totalStockValue,
+				"lowStockCount":           lowStockCount,
+				"categoryCount":           categoryCount,
 			})
 		})
 
@@ -283,6 +317,15 @@ func InitializeRoutes(router *gin.Engine) {
 
 		// Passwortänderungsroute - ein Benutzer kann nur sein eigenes Passwort ändern
 		authorized.POST("/users/change-password", middleware.SelfOrAdminMiddleware(), userHandler.ChangePassword)
+
+		articleHandler := handler.NewArticleHandler()
+		authorized.GET("/articles", articleHandler.ListArticles)
+		authorized.GET("/articles/add", articleHandler.ShowAddArticleForm)
+		authorized.POST("/articles/add", articleHandler.AddArticle)
+		authorized.GET("/articles/view/:id", articleHandler.GetArticleDetails)
+		authorized.GET("/articles/edit/:id", articleHandler.ShowEditArticleForm)
+		authorized.POST("/articles/edit/:id", articleHandler.UpdateArticle)
+		authorized.DELETE("/articles/delete/:id", articleHandler.DeleteArticle)
 
 		employeeHandler := handler.NewEmployeeHandler()
 		documentHandler := handler.NewDocumentHandler()

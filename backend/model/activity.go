@@ -22,6 +22,9 @@ const (
 	ActivityTypeUserAdded         ActivityType = "user_added"
 	ActivityTypeUserUpdated       ActivityType = "user_updated"
 	ActivityTypeUserDeleted       ActivityType = "user_deleted"
+	ActivityTypeArticleAdded      ActivityType = "article_added"
+	ActivityTypeArticleUpdated    ActivityType = "article_updated"
+	ActivityTypeArticleDeleted    ActivityType = "article_deleted"
 )
 
 // Activity repräsentiert eine Aktivität im System
@@ -40,13 +43,13 @@ type Activity struct {
 // GetIconClass gibt die CSS-Klasse für das Icon basierend auf dem Aktivitätstyp zurück
 func (a *Activity) GetIconClass() string {
 	switch a.Type {
-	case ActivityTypeEmployeeAdded, ActivityTypeTrainingAdded, ActivityTypeEvaluationAdded:
+	case ActivityTypeEmployeeAdded, ActivityTypeTrainingAdded, ActivityTypeEvaluationAdded, ActivityTypeArticleAdded:
 		return "bg-green-500"
-	case ActivityTypeEmployeeUpdated, ActivityTypeDocumentUploaded:
+	case ActivityTypeEmployeeUpdated, ActivityTypeDocumentUploaded, ActivityTypeArticleUpdated:
 		return "bg-blue-500"
 	case ActivityTypeVacationRequested, ActivityTypeVacationApproved:
 		return "bg-yellow-500"
-	case ActivityTypeEmployeeDeleted, ActivityTypeVacationRejected:
+	case ActivityTypeEmployeeDeleted, ActivityTypeVacationRejected, ActivityTypeArticleDeleted:
 		return "bg-red-500"
 	default:
 		return "bg-gray-500"
@@ -70,6 +73,12 @@ func (a *Activity) GetIconSVG() string {
 		return "<svg class=\"h-5 w-5 text-white\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><path d=\"M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z\" /></svg>"
 	case ActivityTypeUserUpdated:
 		return "<svg class=\"h-5 w-5 text-white\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><path d=\"M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z\" /></svg>"
+	case ActivityTypeArticleAdded:
+		return "<svg class=\"h-5 w-5 text-white\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><path d=\"M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a1 1 0 011 1v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0v-1h-1a1 1 0 110-2h1v-1a1 1 0 011-1z\" /></svg>"
+	case ActivityTypeArticleUpdated:
+		return "<svg class=\"h-5 w-5 text-white\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><path d=\"M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z\" /></svg>"
+	case ActivityTypeArticleDeleted:
+		return "<svg class=\"h-5 w-5 text-white\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><path fill-rule=\"evenodd\" d=\"M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z\" clip-rule=\"evenodd\" /></svg>"
 	default:
 		return "<svg class=\"h-5 w-5 text-white\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><path fill-rule=\"evenodd\" d=\"M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z\" clip-rule=\"evenodd\" /></svg>"
 	}

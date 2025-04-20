@@ -99,6 +99,9 @@ func TemplateHelpers() template.FuncMap {
 		"now": func() time.Time {
 			return time.Now()
 		},
+		"sub": func(a, b float64) float64 {
+			return a - b
+		},
 		"getInitials": GetInitials, // Neue Hilfsfunktion hinzugefügt
 	}
 }
