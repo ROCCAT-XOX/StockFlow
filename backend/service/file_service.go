@@ -1,7 +1,7 @@
+// backend/service/file_service.go (angepasst für Lagersystem)
 package service
 
 import (
-	"StockFlow/backend/model"
 	"errors"
 	"fmt"
 	"io"
@@ -9,6 +9,8 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"StockFlow/backend/model"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -104,18 +106,17 @@ func (s *FileService) GetFilePath(fileName string) string {
 	return filepath.Join(s.uploadDir, fileName)
 }
 
-// UploadProfileImage lädt ein Profilbild hoch und gibt den Dateipfad zurück
-func (s *FileService) UploadProfileImage(file *multipart.FileHeader, employeeID string) (string, error) {
+// UploadArticleImage lädt ein Artikelbild hoch und gibt den Dateipfad zurück
+func (s *FileService) UploadArticleImage(file *multipart.FileHeader, articleID string) (string, error) {
 	// Generiere einen eindeutigen Dateinamen
 	originalFilename := filepath.Base(file.Filename)
 	extension := filepath.Ext(originalFilename)
-	uniqueFilename := fmt.Sprintf("profile_%s%s", employeeID, extension)
+	uniqueFilename := fmt.Sprintf("article_%s%s", articleID, extension)
 
 	// Definiere den relativen Pfad für die Datenbank (dieser wird im HTML angezeigt)
 	relativePath := fmt.Sprintf("/static/uploads/%s", uniqueFilename)
 
 	// Definiere den vollständigen Pfad, unter dem die Datei gespeichert wird
-	// Geändert von "." zu "./frontend", um mit der router.Static Konfiguration übereinzustimmen
 	filePath := filepath.Join(".", "frontend", "static", "uploads", uniqueFilename)
 
 	// Stelle sicher, dass das Verzeichnis existiert

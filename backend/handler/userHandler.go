@@ -114,6 +114,7 @@ func (h *UserHandler) AddUser(c *gin.Context) {
 		"user",
 		newUser.FirstName+" "+newUser.LastName,
 		"Neuer Benutzer hinzugefügt",
+		0, // Quantity-Parameter hinzufügen
 	)
 
 	// Hier ändert sich die Umleitung - zur Einstellungsseite statt zur Benutzerliste
@@ -210,6 +211,7 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 		"user",
 		userToUpdate.FirstName+" "+userToUpdate.LastName,
 		"Benutzer aktualisiert",
+		0, // Quantity-Parameter hinzufügen
 	)
 
 	// Zurück zur Benutzerliste oder zum Profil
@@ -251,6 +253,7 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 		"user",
 		userToDelete.FirstName+" "+userToDelete.LastName,
 		"Benutzer gelöscht",
+		0, // Quantity-Parameter hinzufügen
 	)
 
 	// Erfolg zurückmelden

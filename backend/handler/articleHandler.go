@@ -2,6 +2,7 @@
 package handler
 
 import (
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
 	"strconv"
 	"time"
@@ -14,13 +15,15 @@ import (
 
 // ArticleHandler verwaltet alle Anfragen zu Artikeln
 type ArticleHandler struct {
-	articleRepo *repository.ArticleRepository
+	articleRepo  *repository.ArticleRepository
+	supplierRepo *repository.SupplierRepository
 }
 
 // NewArticleHandler erstellt einen neuen ArticleHandler
 func NewArticleHandler() *ArticleHandler {
 	return &ArticleHandler{
-		articleRepo: repository.NewArticleRepository(),
+		articleRepo:  repository.NewArticleRepository(),
+		supplierRepo: repository.NewSupplierRepository(),
 	}
 }
 
@@ -60,13 +63,20 @@ func (h *ArticleHandler) ShowAddArticleForm(c *gin.Context) {
 	user, _ := c.Get("user")
 	userModel := user.(*model.User)
 
+	// Lieferanten für Dropdown abrufen
+	suppliers, err := h.supplierRepo.FindAll()
+	if err != nil {
+		suppliers = []*model.Supplier{} // Leere Liste im Fehlerfall
+	}
+
 	c.HTML(http.StatusOK, "article_add.html", gin.H{
-		"title":    "Artikel hinzufügen",
-		"active":   "articles",
-		"user":     userModel.FirstName + " " + userModel.LastName,
-		"email":    userModel.Email,
-		"year":     time.Now().Year(),
-		"userRole": c.GetString("userRole"),
+		"title":     "Artikel hinzufügen",
+		"active":    "articles",
+		"user":      userModel.FirstName + " " + userModel.LastName,
+		"email":     userModel.Email,
+		"year":      time.Now().Year(),
+		"userRole":  c.GetString("userRole"),
+		"suppliers": suppliers,
 	})
 }
 
@@ -79,6 +89,21 @@ func (h *ArticleHandler) AddArticle(c *gin.Context) {
 	ean := c.PostForm("ean")
 	category := c.PostForm("category")
 	unit := c.PostForm("unit")
+	supplierIDStr := c.PostForm("supplierId")
+	supplierArticleNumber := c.PostForm("supplierArticleNumber")
+	maximumStockStr := c.PostForm("maximumStock")
+	reorderQuantityStr := c.PostForm("reorderQuantity")
+	bin := c.PostForm("bin")
+	isActive := c.PostForm("isActive") == "on"
+
+	// Zusätzliche Werte parsen
+	var supplierID primitive.ObjectID
+	if supplierIDStr != "" {
+		supplierID, _ = primitive.ObjectIDFromHex(supplierIDStr)
+	}
+
+	maximumStock, _ := strconv.ParseFloat(maximumStockStr, 64)
+	reorderQuantity, _ := strconv.ParseFloat(reorderQuantityStr, 64)
 
 	// Numerische Werte parsen
 	stockCurrent, _ := strconv.ParseFloat(c.PostForm("stockCurrent"), 64)
@@ -94,27 +119,34 @@ func (h *ArticleHandler) AddArticle(c *gin.Context) {
 
 	// Neuen Artikel erstellen
 	article := &model.Article{
-		ArticleNumber:        articleNumber,
-		ShortName:            shortName,
-		LongName:             longName,
-		EAN:                  ean,
-		Category:             category,
-		Unit:                 unit,
-		StockCurrent:         stockCurrent,
-		StockReserved:        stockReserved,
-		MinimumStock:         minimumStock,
-		PurchasePriceNet:     purchasePriceNet,
-		SalesPriceGross:      salesPriceGross,
-		SupplierNumber:       c.PostForm("supplierNumber"),
-		DeliveryTimeInDays:   deliveryTimeInDays,
-		StorageLocation:      c.PostForm("storageLocation"),
-		WeightKg:             weightKg,
-		Dimensions:           c.PostForm("dimensions"),
-		SerialNumberRequired: serialNumberRequired,
-		HazardClass:          c.PostForm("hazardClass"),
-		Notes:                c.PostForm("notes"),
-		CreatedAt:            time.Now(),
-		UpdatedAt:            time.Now(),
+		ArticleNumber:         articleNumber,
+		ShortName:             shortName,
+		LongName:              longName,
+		EAN:                   ean,
+		Category:              category,
+		Unit:                  unit,
+		StockCurrent:          stockCurrent,
+		StockReserved:         stockReserved,
+		MinimumStock:          minimumStock,
+		PurchasePriceNet:      purchasePriceNet,
+		SalesPriceGross:       salesPriceGross,
+		SupplierNumber:        c.PostForm("supplierNumber"),
+		DeliveryTimeInDays:    deliveryTimeInDays,
+		StorageLocation:       c.PostForm("storageLocation"),
+		WeightKg:              weightKg,
+		Dimensions:            c.PostForm("dimensions"),
+		SerialNumberRequired:  serialNumberRequired,
+		HazardClass:           c.PostForm("hazardClass"),
+		Notes:                 c.PostForm("notes"),
+		CreatedAt:             time.Now(),
+		UpdatedAt:             time.Now(),
+		SupplierID:            supplierID,
+		SupplierArticleNumber: supplierArticleNumber,
+		MaximumStock:          maximumStock,
+		ReorderQuantity:       reorderQuantity,
+		Bin:                   bin,
+		IsActive:              isActive,
+		LastStockTakeDate:     time.Time{},
 	}
 
 	// Artikel in der Datenbank speichern
@@ -129,22 +161,91 @@ func (h *ArticleHandler) AddArticle(c *gin.Context) {
 	}
 
 	// Aktivität loggen
-	currentUser, _ := c.Get("user")
-	currentUserModel := currentUser.(*model.User)
+	user, _ := c.Get("user")
+	userModel := user.(*model.User)
 
 	activityRepo := repository.NewActivityRepository()
 	_, _ = activityRepo.LogActivity(
 		model.ActivityTypeArticleAdded,
-		currentUserModel.ID,
-		currentUserModel.FirstName+" "+currentUserModel.LastName,
+		userModel.ID,
+		userModel.FirstName+" "+userModel.LastName,
 		article.ID,
 		"article",
 		article.ShortName,
 		"Neuer Artikel hinzugefügt",
+		0, // Quantity-Parameter hinzufügen
 	)
 
 	// Zurück zur Artikelliste mit Erfolgsmeldung
 	c.Redirect(http.StatusFound, "/articles?success=added")
+}
+
+// Neue Funktion zur Unterstützung der Bestandsübersicht
+func (h *ArticleHandler) ShowStockOverview(c *gin.Context) {
+	// Aktuellen Benutzer aus dem Context abrufen
+	user, _ := c.Get("user")
+	userModel := user.(*model.User)
+
+	// Filter-Parameter aus der Anfrage extrahieren
+	categoryFilter := c.DefaultQuery("category", "")
+	stockStatus := c.DefaultQuery("status", "")
+
+	// Artikel abrufen (gefiltert, falls notwendig)
+	var articles []*model.Article
+	var err error
+
+	if categoryFilter != "" && stockStatus != "" {
+		articles, err = h.articleRepo.FindByCategoryAndStockStatus(categoryFilter, stockStatus)
+	} else if categoryFilter != "" {
+		articles, err = h.articleRepo.FindByCategory(categoryFilter)
+	} else if stockStatus != "" {
+		articles, err = h.articleRepo.FindByStockStatus(stockStatus)
+	} else {
+		articles, err = h.articleRepo.FindAll()
+	}
+
+	if err != nil {
+		c.HTML(http.StatusInternalServerError, "error.html", gin.H{
+			"title":   "Fehler",
+			"message": "Fehler beim Abrufen der Artikel: " + err.Error(),
+			"year":    time.Now().Year(),
+		})
+		return
+	}
+
+	// Alle Kategorien für Filter
+	categories, _ := h.articleRepo.GetAllCategories()
+
+	// Statistiken berechnen
+	var totalStock float64
+	var totalValue float64
+	var lowStockCount int
+
+	for _, article := range articles {
+		totalStock += article.StockCurrent
+		totalValue += article.StockCurrent * article.PurchasePriceNet
+
+		if article.IsBelowMinimum() {
+			lowStockCount++
+		}
+	}
+
+	c.HTML(http.StatusOK, "stock_overview.html", gin.H{
+		"title":          "Bestandsübersicht",
+		"active":         "stock",
+		"user":           userModel.FirstName + " " + userModel.LastName,
+		"email":          userModel.Email,
+		"year":           time.Now().Year(),
+		"articles":       articles,
+		"categories":     categories,
+		"categoryFilter": categoryFilter,
+		"stockStatus":    stockStatus,
+		"totalArticles":  len(articles),
+		"totalStock":     totalStock,
+		"totalValue":     totalValue,
+		"lowStockCount":  lowStockCount,
+		"userRole":       c.GetString("userRole"),
+	})
 }
 
 // GetArticleDetails zeigt die Details eines Artikels an
@@ -258,18 +359,19 @@ func (h *ArticleHandler) UpdateArticle(c *gin.Context) {
 	}
 
 	// Aktivität loggen
-	currentUser, _ := c.Get("user")
-	currentUserModel := currentUser.(*model.User)
+	user, _ := c.Get("user")
+	userModel := user.(*model.User)
 
 	activityRepo := repository.NewActivityRepository()
 	_, _ = activityRepo.LogActivity(
 		model.ActivityTypeArticleUpdated,
-		currentUserModel.ID,
-		currentUserModel.FirstName+" "+currentUserModel.LastName,
+		userModel.ID,
+		userModel.FirstName+" "+userModel.LastName,
 		article.ID,
 		"article",
 		article.ShortName,
 		"Artikel aktualisiert",
+		0, // Quantity-Parameter hinzufügen
 	)
 
 	// Zurück zur Artikelliste mit Erfolgsmeldung
@@ -307,6 +409,7 @@ func (h *ArticleHandler) DeleteArticle(c *gin.Context) {
 		"article",
 		article.ShortName,
 		"Artikel gelöscht",
+		0, // Quantity-Parameter hinzufügen
 	)
 
 	// Erfolg zurückmelden

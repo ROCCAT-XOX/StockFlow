@@ -6,7 +6,6 @@ import (
 	"StockFlow/backend/middleware"
 	"StockFlow/backend/model"
 	"StockFlow/backend/repository"
-	"StockFlow/backend/service"
 	"StockFlow/backend/utils"
 	"fmt"
 	"net/http"
@@ -52,7 +51,7 @@ func InitializeRoutes(router *gin.Engine) {
 	authorized := router.Group("/")
 	authorized.Use(middleware.AuthMiddleware())
 	{
-		// In der InitializeRoutes-Funktion nach der Deklaration der Auth-Middleware
+		// User-Handler
 		userHandler := handler.NewUserHandler()
 
 		// Root-Pfad zum Dashboard umleiten
@@ -61,197 +60,26 @@ func InitializeRoutes(router *gin.Engine) {
 		})
 
 		// Dashboard
+		// Die Variable dashboardHandler wird nicht verwendet, wir entfernen sie
 		authorized.GET("/dashboard", func(c *gin.Context) {
 			user, _ := c.Get("user")
 			userModel := user.(*model.User)
 
-			// Repository für Mitarbeiterdaten
-			employeeRepo := repository.NewEmployeeRepository()
-
-			// Service für Kostenberechnungen initialisieren
-			costService := service.NewCostService()
-
-			// Alle Mitarbeiter abrufen
-			allEmployees, err := employeeRepo.FindAll()
-			if err != nil {
-				allEmployees = []*model.Employee{} // Leere Liste im Fehlerfall
-			}
-
-			totalEmployees := len(allEmployees)
-
-			// Monatliche Personalkosten berechnen
-			monthlyLaborCosts := costService.CalculateMonthlyLaborCosts(allEmployees)
-
-			// Monatliche Kostendaten für das Diagramm generieren
-			monthlyCostsData := costService.GenerateMonthlyLaborCostsTrend(monthlyLaborCosts)
-
-			// Durchschnittskosten pro Mitarbeiter berechnen
-			avgCostsPerEmployee := costService.CalculateAvgCostPerEmployee(monthlyLaborCosts, totalEmployees)
-
-			// Durchschnittliche Kosten pro Mitarbeiter über Zeit generieren
-			avgCostsPerEmployeeData := costService.GenerateMonthlyLaborCostsTrend(avgCostsPerEmployee)
-
-			// Abteilungsverteilung berechnen
-			departmentLabels, departmentData := costService.CountEmployeesByDepartment(allEmployees)
-
-			// Anstehende Bewertungen generieren
-			upcomingReviewsList := costService.GenerateExpectedReviews(allEmployees)
-
-			// Personalkostenverteilung nach Abteilung berechnen
-			deptCostsLabels, deptCostsData := costService.CalculateCostsByDepartment(allEmployees)
-
-			// Altersstruktur berechnen
-			ageGroups, ageCounts := costService.CalculateAgeDistribution(allEmployees)
-
-			// Repository für Aktivitätsdaten
-			activityRepo := repository.NewActivityRepository()
-
-			// Neueste Aktivitäten abrufen
-			recentActivitiesData, err := activityRepo.FindRecent(5)
-			if err != nil {
-				recentActivitiesData = []*model.Activity{} // Leere Liste im Fehlerfall
-			}
-
-			// Aktivitäten in ein Format konvertieren, das für die Vorlage geeignet ist
-			var recentActivities []gin.H
-			for i, activity := range recentActivitiesData {
-				isLast := i == len(recentActivitiesData)-1
-
-				// Nachricht formatieren
-				var message string
-				switch activity.Type {
-				case model.ActivityTypeEmployeeAdded:
-					message = fmt.Sprintf("<a href=\"/employees/view/%s\" class=\"font-medium text-gray-900\">%s</a> wurde als neuer Mitarbeiter hinzugefügt",
-						activity.TargetID.Hex(), activity.TargetName)
-				case model.ActivityTypeEmployeeUpdated:
-					message = fmt.Sprintf("<a href=\"/employees/view/%s\" class=\"font-medium text-gray-900\">%s</a> wurde aktualisiert",
-						activity.TargetID.Hex(), activity.TargetName)
-				case model.ActivityTypeVacationRequested:
-					message = fmt.Sprintf("<a href=\"/employees/view/%s\" class=\"font-medium text-gray-900\">%s</a> hat einen Urlaubsantrag eingereicht",
-						activity.TargetID.Hex(), activity.TargetName)
-				case model.ActivityTypeVacationApproved:
-					message = fmt.Sprintf("Urlaubsantrag von <a href=\"/employees/view/%s\" class=\"font-medium text-gray-900\">%s</a> wurde genehmigt",
-						activity.TargetID.Hex(), activity.TargetName)
-				case model.ActivityTypeDocumentUploaded:
-					message = fmt.Sprintf("<a href=\"/employees/view/%s\" class=\"font-medium text-gray-900\">%s</a> hat ein Dokument hochgeladen",
-						activity.TargetID.Hex(), activity.TargetName)
-				case model.ActivityTypeTrainingAdded:
-					message = fmt.Sprintf("Weiterbildung für <a href=\"/employees/view/%s\" class=\"font-medium text-gray-900\">%s</a> hinzugefügt",
-						activity.TargetID.Hex(), activity.TargetName)
-				case model.ActivityTypeEvaluationAdded:
-					message = fmt.Sprintf("Leistungsbeurteilung für <a href=\"/employees/view/%s\" class=\"font-medium text-gray-900\">%s</a> hinzugefügt",
-						activity.TargetID.Hex(), activity.TargetName)
-				case model.ActivityTypeEmployeeDeleted:
-					message = fmt.Sprintf("Mitarbeiter <span class=\"font-medium text-gray-900\">%s</span> wurde entfernt",
-						activity.TargetName)
-				default:
-					message = activity.Description
-				}
-
-				recentActivities = append(recentActivities, gin.H{
-					"IconBgClass": activity.GetIconClass(),
-					"IconSVG":     activity.GetIconSVG(),
-					"Message":     message,
-					"Time":        activity.FormatTimeAgo(),
-					"IsLast":      isLast,
-				})
-			}
-
-			// Falls keine Aktivitäten gefunden wurden, verwenden wir Beispieldaten
-			if len(recentActivities) == 0 {
-				recentActivities = []gin.H{
-					{
-						"IconBgClass": "bg-gray-500",
-						"IconSVG":     "<svg class=\"h-5 w-5 text-white\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><path fill-rule=\"evenodd\" d=\"M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z\" clip-rule=\"evenodd\" /></svg>",
-						"Message":     "Keine Aktivitäten vorhanden",
-						"Time":        "Jetzt",
-						"IsLast":      true,
-					},
-				}
-			}
-
-			// Beispielhafte Daten für das Dashboard - Mitarbeiterübersicht
-			recentEmployees := []gin.H{}
-
-			// Wenn wir tatsächliche Mitarbeiterdaten haben, diese verwenden
-			if len(allEmployees) > 0 {
-				maxToShow := 4
-				if len(allEmployees) < maxToShow {
-					maxToShow = len(allEmployees)
-				}
-
-				for i := 0; i < maxToShow; i++ {
-					emp := allEmployees[i]
-					status := "Aktiv"
-					switch emp.Status {
-					case model.EmployeeStatusInactive:
-						status = "Inaktiv"
-					case model.EmployeeStatusOnLeave:
-						status = "Im Urlaub"
-					case model.EmployeeStatusRemote:
-						status = "Remote"
-					}
-
-					profileImg := emp.ProfileImage
-					if profileImg == "" {
-						profileImg = "/static/img/default-avatar.png"
-					}
-
-					recentEmployees = append(recentEmployees, gin.H{
-						"ID":           emp.ID.Hex(),
-						"Name":         emp.FirstName + " " + emp.LastName,
-						"Position":     emp.Position,
-						"Status":       status,
-						"ProfileImage": profileImg,
-					})
-				}
-			} else {
-				// Beispielhafte Daten, falls keine echten Daten vorhanden sind
-				recentEmployees = []gin.H{
-					{
-						"ID":           "1",
-						"Name":         "Max Mustermann",
-						"Position":     "Software Developer",
-						"Status":       "Aktiv",
-						"ProfileImage": "/static/img/default-avatar.png",
-					},
-					{
-						"ID":           "2",
-						"Name":         "Erika Musterfrau",
-						"Position":     "HR Manager",
-						"Status":       "Im Urlaub",
-						"ProfileImage": "/static/img/default-avatar.png",
-					},
-					{
-						"ID":           "3",
-						"Name":         "John Doe",
-						"Position":     "Marketing Specialist",
-						"Status":       "Remote",
-						"ProfileImage": "/static/img/default-avatar.png",
-					},
-					{
-						"ID":           "4",
-						"Name":         "Jane Smith",
-						"Position":     "Finance Director",
-						"Status":       "Aktiv",
-						"ProfileImage": "/static/img/default-avatar.png",
-					},
-				}
-			}
-
-			// Anzahl abgelaufener Dokumente (in einer echten Anwendung würden wir dies berechnen)
-			expiredDocuments := 2
-
-			// Formatieren der monatlichen Personalkosten
-			formattedLaborCosts := fmt.Sprintf("%.2f", monthlyLaborCosts)
-
+			// Repositories und Services initialisieren
 			articleRepo := repository.NewArticleRepository()
+			transactionRepo := repository.NewTransactionRepository()
+			supplierRepo := repository.NewSupplierRepository()
+			activityRepo := repository.NewActivityRepository()
+			// stockService wird nicht verwendet, wir entfernen es
+
+			// Artikel-Statistiken abrufen
 			allArticles, err := articleRepo.FindAll()
 			if err != nil {
 				allArticles = []*model.Article{} // Leere Liste im Fehlerfall
 			}
 
 			totalArticles := len(allArticles)
+
 			// Werte für das Dashboard berechnen
 			var totalStock float64
 			var totalStockValue float64
@@ -274,6 +102,106 @@ func InitializeRoutes(router *gin.Engine) {
 			// Kategorien zählen
 			categoryCount := len(totalCategories)
 
+			// Lieferantenzählung
+			supplierCount, _ := supplierRepo.Count()
+
+			// Artikel unter Mindestbestand
+			lowStockArticles, err := articleRepo.FindLowStock(10) // Die Top 10
+			if err != nil {
+				lowStockArticles = []*model.Article{} // Leere Liste im Fehlerfall
+			}
+
+			// Neueste Transaktionen
+			recentTransactions, err := transactionRepo.FindRecent(5)
+			if err != nil {
+				recentTransactions = []*model.Transaction{} // Leere Liste im Fehlerfall
+			}
+
+			// Neueste Aktivitäten
+			recentActivitiesData, err := activityRepo.FindRecent(10)
+			if err != nil {
+				recentActivitiesData = []*model.Activity{} // Leere Liste im Fehlerfall
+			}
+
+			// Aktivitäten in ein Template-freundlicheres Format konvertieren
+			var recentActivities []gin.H
+			for i, activity := range recentActivitiesData {
+				var message string
+
+				switch activity.Type {
+				case model.ActivityTypeArticleAdded:
+					message = fmt.Sprintf("<a href=\"/articles/view/%s\" class=\"font-medium text-gray-900\">%s</a> wurde als neuer Artikel hinzugefügt",
+						activity.TargetID.Hex(), activity.TargetName)
+				case model.ActivityTypeArticleUpdated:
+					message = fmt.Sprintf("Artikel <a href=\"/articles/view/%s\" class=\"font-medium text-gray-900\">%s</a> wurde aktualisiert",
+						activity.TargetID.Hex(), activity.TargetName)
+				case model.ActivityTypeArticleDeleted:
+					message = fmt.Sprintf("Artikel <span class=\"font-medium text-gray-900\">%s</span> wurde gelöscht",
+						activity.TargetName)
+				case model.ActivityTypeStockAdjusted:
+					message = fmt.Sprintf("Bestand für <a href=\"/articles/view/%s\" class=\"font-medium text-gray-900\">%s</a> wurde angepasst",
+						activity.TargetID.Hex(), activity.TargetName)
+				case model.ActivityTypeStockTaking:
+					message = fmt.Sprintf("Inventur für <a href=\"/articles/view/%s\" class=\"font-medium text-gray-900\">%s</a> wurde durchgeführt",
+						activity.TargetID.Hex(), activity.TargetName)
+				case model.ActivityTypeUserAdded:
+					message = fmt.Sprintf("Benutzer <span class=\"font-medium text-gray-900\">%s</span> wurde hinzugefügt",
+						activity.TargetName)
+				case model.ActivityTypeUserUpdated:
+					message = fmt.Sprintf("Benutzer <span class=\"font-medium text-gray-900\">%s</span> wurde aktualisiert",
+						activity.TargetName)
+				case model.ActivityTypeUserDeleted:
+					message = fmt.Sprintf("Benutzer <span class=\"font-medium text-gray-900\">%s</span> wurde entfernt",
+						activity.TargetName)
+				case model.ActivityTypeSupplierAdded:
+					message = fmt.Sprintf("Lieferant <a href=\"/suppliers/view/%s\" class=\"font-medium text-gray-900\">%s</a> wurde hinzugefügt",
+						activity.TargetID.Hex(), activity.TargetName)
+				case model.ActivityTypeSupplierUpdated:
+					message = fmt.Sprintf("Lieferant <a href=\"/suppliers/view/%s\" class=\"font-medium text-gray-900\">%s</a> wurde aktualisiert",
+						activity.TargetID.Hex(), activity.TargetName)
+				case model.ActivityTypeSupplierDeleted:
+					message = fmt.Sprintf("Lieferant <span class=\"font-medium text-gray-900\">%s</span> wurde entfernt",
+						activity.TargetName)
+				default:
+					message = activity.Description
+				}
+
+				recentActivities = append(recentActivities, gin.H{
+					"IconBgClass": activity.GetIconClass(),
+					"IconSVG":     activity.GetIconSVG(),
+					"Message":     message,
+					"Time":        activity.FormatTimeAgo(),
+					"IsLast":      i == len(recentActivitiesData)-1,
+				})
+			}
+
+			// Lager-Bewegungsdaten für Diagramme
+			stockMovementData, err := transactionRepo.GetStockMovementSummary()
+			if err != nil {
+				stockMovementData = map[string][]float64{
+					"stockIn":    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+					"stockOut":   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+					"adjustment": {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+				}
+			}
+
+			// Monatsbezeichnungen für Charts
+			monthLabels := []string{"Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"}
+
+			// Verteilung nach Kategorien
+			categorySummary, err := articleRepo.GetCategorySummary()
+			if err != nil {
+				categorySummary = map[string][]interface{}{
+					"labels": {"Keine Kategorie"},
+					"counts": {0},
+					"values": {0.0},
+				}
+			}
+
+			// Transaktionen der letzten 30 Tage
+			thirtyDaysAgo := time.Now().AddDate(0, 0, -30)
+			recentTransactionsCount, _ := transactionRepo.CountSince(thirtyDaysAgo)
+
 			// Daten an das Template übergeben
 			c.HTML(http.StatusOK, "dashboard.html", gin.H{
 				"title":                   "Dashboard",
@@ -281,26 +209,22 @@ func InitializeRoutes(router *gin.Engine) {
 				"user":                    userModel.FirstName + " " + userModel.LastName,
 				"email":                   userModel.Email,
 				"year":                    time.Now().Year(),
-				"totalEmployees":          totalEmployees,
-				"monthlyLaborCosts":       formattedLaborCosts,
-				"upcomingReviews":         len(upcomingReviewsList),
-				"expiredDocuments":        expiredDocuments,
-				"recentEmployees":         recentEmployees,
-				"upcomingReviewsList":     upcomingReviewsList,
-				"recentActivities":        recentActivities,
-				"monthlyCostsData":        monthlyCostsData,
-				"avgCostsPerEmployeeData": avgCostsPerEmployeeData,
-				"departmentLabels":        departmentLabels,
-				"departmentData":          departmentData,
-				"deptCostsLabels":         deptCostsLabels,
-				"deptCostsData":           deptCostsData,
-				"ageGroups":               ageGroups,
-				"ageCounts":               ageCounts,
+				"userRole":                c.GetString("userRole"),
 				"totalArticles":           totalArticles,
 				"totalStock":              totalStock,
 				"totalStockValue":         totalStockValue,
 				"lowStockCount":           lowStockCount,
 				"categoryCount":           categoryCount,
+				"supplierCount":           supplierCount,
+				"recentTransactionsCount": recentTransactionsCount,
+				"lowStockArticles":        lowStockArticles,
+				"recentTransactions":      recentTransactions,
+				"recentActivities":        recentActivities,
+				"stockMovementData":       stockMovementData,
+				"monthLabels":             monthLabels,
+				"categoryLabels":          categorySummary["labels"],
+				"categoryCounts":          categorySummary["counts"],
+				"categoryValues":          categorySummary["values"],
 			})
 		})
 
@@ -318,6 +242,7 @@ func InitializeRoutes(router *gin.Engine) {
 		// Passwortänderungsroute - ein Benutzer kann nur sein eigenes Passwort ändern
 		authorized.POST("/users/change-password", middleware.SelfOrAdminMiddleware(), userHandler.ChangePassword)
 
+		// Artikel-Routen
 		articleHandler := handler.NewArticleHandler()
 		authorized.GET("/articles", articleHandler.ListArticles)
 		authorized.GET("/articles/add", articleHandler.ShowAddArticleForm)
@@ -326,49 +251,31 @@ func InitializeRoutes(router *gin.Engine) {
 		authorized.GET("/articles/edit/:id", articleHandler.ShowEditArticleForm)
 		authorized.POST("/articles/edit/:id", articleHandler.UpdateArticle)
 		authorized.DELETE("/articles/delete/:id", articleHandler.DeleteArticle)
+		authorized.GET("/stock", articleHandler.ShowStockOverview)
 
-		employeeHandler := handler.NewEmployeeHandler()
-		documentHandler := handler.NewDocumentHandler()
+		// Transaktions-Routen
+		transactionHandler := handler.NewTransactionHandler()
+		authorized.GET("/transactions", transactionHandler.ListTransactions)
+		authorized.GET("/transactions/add", transactionHandler.ShowAddTransactionForm)
+		authorized.POST("/transactions/add", transactionHandler.AddTransaction)
+		authorized.GET("/transactions/view/:id", transactionHandler.GetTransactionDetails)
 
-		// Mitarbeiter-Routen zum autorisierten Bereich hinzufügen
-		authorized.GET("/employees", employeeHandler.ListEmployees)
-		authorized.GET("/employees/view/:id", employeeHandler.GetEmployeeDetails)
-		authorized.GET("/employees/edit/:id", employeeHandler.ShowEditEmployeeForm)
-		authorized.POST("/employees/add", employeeHandler.AddEmployee)
-		authorized.POST("/employees/edit/:id", employeeHandler.UpdateEmployee)
-		authorized.DELETE("/employees/delete/:id", employeeHandler.DeleteEmployee)
-
-		// Profilbil hinzufügen
-		// Im router.go, innerhalb des authorized-Bereichs
-		authorized.POST("/employees/:id/profile-image", employeeHandler.UploadProfileImage)
-
-		// Dokument-Routen
-		authorized.POST("/employees/:id/documents", documentHandler.UploadDocument)
-		authorized.DELETE("/employees/:id/documents/:documentId", documentHandler.DeleteDocument)
-		authorized.GET("/employees/:id/documents/:documentId/download", documentHandler.DownloadDocument)
-
-		// Training-Routen
-		authorized.POST("/employees/:id/trainings", documentHandler.AddTraining)
-		authorized.DELETE("/employees/:id/trainings/:trainingId", documentHandler.DeleteTraining)
-
-		// Evaluation-Routen
-		authorized.POST("/employees/:id/evaluations", documentHandler.AddEvaluation)
-		authorized.DELETE("/employees/:id/evaluations/:evaluationId", documentHandler.DeleteEvaluation)
-
-		// Absence-Routen
-		authorized.POST("/employees/:id/absences", documentHandler.AddAbsence)
-		authorized.DELETE("/employees/:id/absences/:absenceId", documentHandler.DeleteAbsence)
-		authorized.POST("/employees/:id/absences/:absenceId/approve", documentHandler.ApproveAbsence)
-
-		// Development-Routen
-		authorized.POST("/employees/:id/development", documentHandler.AddDevelopmentItem)
-		authorized.DELETE("/employees/:id/development/:itemId", documentHandler.DeleteDevelopmentItem)
+		// Lieferanten-Routen
+		supplierHandler := handler.NewSupplierHandler()
+		authorized.GET("/suppliers", supplierHandler.ListSuppliers)
+		authorized.GET("/suppliers/add", supplierHandler.ShowAddSupplierForm)
+		authorized.POST("/suppliers/add", supplierHandler.AddSupplier)
+		authorized.GET("/suppliers/view/:id", supplierHandler.GetSupplierDetails)
+		authorized.GET("/suppliers/edit/:id", supplierHandler.ShowEditSupplierForm)
+		authorized.POST("/suppliers/edit/:id", supplierHandler.UpdateSupplier)
+		authorized.DELETE("/suppliers/delete/:id", supplierHandler.DeleteSupplier)
 
 		// Optionale API-Endpoints für AJAX-Anfragen
 		api := router.Group("/api")
 		api.Use(middleware.AuthMiddleware())
 		{
-			api.DELETE("/employees/:id", employeeHandler.DeleteEmployee)
+			api.DELETE("/articles/:id", articleHandler.DeleteArticle)
+			api.DELETE("/suppliers/:id", supplierHandler.DeleteSupplier)
 		}
 	}
 }
