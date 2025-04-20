@@ -1,12 +1,12 @@
 {{ template "head" . }}
-<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+<body class="bg-[#F5F5DC] min-h-screen flex items-center justify-center p-4">
 <div class="w-full max-w-md">
     <!-- Login Card -->
     <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
         <!-- Logo Section -->
-        <div class="bg-green-600 p-8 flex flex-col items-center justify-center">
+        <div class="bg-[#FF9800] p-8 flex flex-col items-center justify-center">
             <h1 class="text-3xl font-bold text-white tracking-tight">StockFlow</h1>
-            <p class="text-green-100 mt-2">HR-Management-System</p>
+            <p class="text-white opacity-90 mt-2">HR-Management-System</p>
         </div>
 
         <!-- Form Section -->
@@ -19,7 +19,7 @@
 
             <form class="space-y-5" action="/auth" method="POST">
                 <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">E-Mail</label>
+                    <label for="email" class="block text-sm font-medium text-[#333333] mb-1">E-Mail</label>
                     <div class="relative">
                             <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -28,13 +28,13 @@
                                 </svg>
                             </span>
                         <input type="email" name="email" id="email"
-                               class="pl-10 w-full py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                               class="pl-10 w-full py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF9800]"
                                placeholder="E-Mail-Adresse eingeben" required>
                     </div>
                 </div>
 
                 <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Passwort</label>
+                    <label for="password" class="block text-sm font-medium text-[#333333] mb-1">Passwort</label>
                     <div class="relative">
                             <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -42,14 +42,14 @@
                                 </svg>
                             </span>
                         <input type="password" name="password" id="password"
-                               class="pl-10 w-full py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                               class="pl-10 w-full py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF9800]"
                                placeholder="Passwort eingeben" required>
                     </div>
                 </div>
 
                 <div class="pt-2">
                     <button type="submit"
-                            class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                            class="w-full bg-[#FF9800] hover:bg-[#e68a00] text-white font-medium py-3 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#FF9800] focus:ring-offset-2">
                         Anmelden
                     </button>
                 </div>
@@ -58,7 +58,7 @@
     </div>
 
     <!-- Footer -->
-    <div class="mt-6 text-center text-gray-500 text-sm">
+    <div class="mt-6 text-center text-[#333333] text-sm">
         <p>&copy; {{ .year }} StockFlow - HR Management System</p>
     </div>
 </div>

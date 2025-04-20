@@ -1,5 +1,5 @@
 {{ template "head" . }}
-<body class="bg-gray-50 min-h-screen flex flex-col">
+<body class="bg-[#F5F5DC] min-h-screen flex flex-col">
 <!-- Navigation -->
 {{ template "navigation" . }}
 
@@ -8,25 +8,25 @@
   {{if eq .userRole "user"}}
   <!-- Eingeschränktes Dashboard für einfache Benutzer -->
   <div class="bg-white shadow rounded-lg p-6 mb-6">
-    <h2 class="text-xl font-semibold text-gray-800 mb-4">Willkommen, {{.user}}!</h2>
+    <h2 class="text-xl font-semibold text-[#333333] mb-4">Willkommen, {{.user}}!</h2>
     <p class="text-gray-600 mb-4">
       Dies ist dein persönliches Dashboard. Hier findest du Informationen zu deinem Konto und deinen Aktivitäten.
     </p>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-      <div class="bg-gray-50 p-4 rounded-lg">
-        <h3 class="text-md font-medium text-gray-800 mb-2">Dein Profil</h3>
+      <div class="bg-[#F5F5DC] p-4 rounded-lg">
+        <h3 class="text-md font-medium text-[#333333] mb-2">Dein Profil</h3>
         <p class="text-sm text-gray-600 mb-4">Verwalte deine persönlichen Informationen und Passwort.</p>
-        <a href="/profile" class="text-green-600 hover:text-green-800 text-sm font-medium">Zum Profil →</a>
+        <a href="/profile" class="text-[#FF9800] hover:text-[#e68a00] text-sm font-medium">Zum Profil →</a>
       </div>
 
-      <div class="bg-gray-50 p-4 rounded-lg">
-        <h3 class="text-md font-medium text-gray-800 mb-2">Letzte Aktivitäten</h3>
+      <div class="bg-[#F5F5DC] p-4 rounded-lg">
+        <h3 class="text-md font-medium text-[#333333] mb-2">Letzte Aktivitäten</h3>
         <div class="space-y-2">
           {{range .recentActivities}}
           <div class="text-sm">
             <span class="text-gray-500">{{.Time}}:</span>
-            <span class="text-gray-800">{{.Message | safeHTML}}</span>
+            <span class="text-[#333333]">{{.Message | safeHTML}}</span>
           </div>
           {{else}}
           <p class="text-sm text-gray-500">Keine kürzlichen Aktivitäten.</p>
@@ -39,14 +39,14 @@
   {{else}}
   <!-- Dashboard Header mit Statistiken -->
   <div class="grid grid-cols-1 gap-6 mb-6 lg:grid-cols-4">
-    <div class="flex items-center p-4 bg-white rounded-lg shadow-md border-l-4 border-green-500">
-      <div class="flex-shrink-0 mr-4 text-green-500">
+    <div class="flex items-center p-4 bg-white rounded-lg shadow-md border-l-4 border-[#FF9800]">
+      <div class="flex-shrink-0 mr-4 text-[#FF9800]">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
         </svg>
       </div>
       <div>
-        <span class="block text-2xl font-bold text-black">{{.totalArticles}}</span>
+        <span class="block text-2xl font-bold text-[#333333]">{{.totalArticles}}</span>
         <span class="block text-gray-500">Artikel</span>
       </div>
     </div>
@@ -57,7 +57,7 @@
         </svg>
       </div>
       <div>
-        <span class="block text-2xl font-bold text-black">{{printf "%.0f" .totalStock}}</span>
+        <span class="block text-2xl font-bold text-[#333333]">{{printf "%.0f" .totalStock}}</span>
         <span class="block text-gray-500">Gesamtbestand</span>
       </div>
     </div>
@@ -68,7 +68,7 @@
         </svg>
       </div>
       <div>
-        <span class="block text-2xl font-bold text-black">{{printf "%.2f" .totalStockValue}} €</span>
+        <span class="block text-2xl font-bold text-[#333333]">{{printf "%.2f" .totalStockValue}} €</span>
         <span class="block text-gray-500">Warenwert</span>
       </div>
     </div>
@@ -79,7 +79,7 @@
         </svg>
       </div>
       <div>
-        <span class="block text-2xl font-bold text-black">{{.lowStockCount}}</span>
+        <span class="block text-2xl font-bold text-[#333333]">{{.lowStockCount}}</span>
         <span class="block text-gray-500">Artikeln unter Mindestbestand</span>
       </div>
     </div>
@@ -89,45 +89,27 @@
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <!-- Linke Spalte -->
     <div class="lg:col-span-2 space-y-6">
-      <!-- Mitarbeiterübersicht-Karte -->
+      <!-- Artikel unter Mindestbestand -->
       <div class="bg-white rounded-xl shadow-md overflow-hidden">
         <div class="flex items-center justify-between p-4 border-b border-gray-200">
-          <h3 class="text-lg font-semibold text-gray-800">Mitarbeiterübersicht</h3>
-          <div class="flex space-x-2">
-            <div class="relative">
-              <select id="employee-filter" class="text-sm border-gray-300 rounded-md pr-8 focus:ring-green-500 focus:border-green-500">
-                <option value="all">Alle</option>
-                <option value="active">Aktiv</option>
-                <option value="onLeave">Im Urlaub</option>
-                <option value="remote">Remote</option>
-              </select>
-            </div>
-            <a href="/employees" class="text-sm text-green-600 hover:underline">Alle anzeigen</a>
-          </div>
+          <h3 class="text-lg font-semibold text-[#333333]">Artikel unter Mindestbestand</h3>
+          <a href="/stock" class="text-sm text-[#FF9800] hover:text-[#e68a00]">Alle anzeigen</a>
         </div>
         <div class="p-4">
-          <!-- Employee Grid Section -->
-          <div id="employees-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
-            {{range .recentEmployees}}
+          <!-- Artikel Grid -->
+          <div id="low-stock-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+            {{range .lowStockArticles}}
             <div class="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
               <div class="flex items-center p-4">
-                {{if .ProfileImage}}
-                <img class="h-12 w-12 rounded-full object-cover" src="{{.ProfileImage}}" alt="{{.Name}}">
-                {{else}}
-                <div class="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center text-green-800 text-sm font-medium">
-                  {{ getInitials .Name }}
-                </div>
-                {{end}}
-
                 <div class="flex-1 min-w-0">
-                  <p class="text-sm font-medium text-gray-900 truncate">{{.Name}}</p>
-                  <p class="text-sm text-gray-500 truncate">{{.Position}}</p>
+                  <p class="text-sm font-medium text-[#333333] truncate">{{.ShortName}}</p>
+                  <p class="text-sm text-gray-500 truncate">Artikel-Nr: {{.ArticleNumber}}</p>
                   <div class="flex items-center mt-1">
-                    <span class="flex h-2 w-2 rounded-full bg-green-500 mr-1.5"></span>
-                    <span class="text-xs text-gray-500">{{.Status}}</span>
+                    <span class="flex h-2 w-2 rounded-full bg-red-500 mr-1.5"></span>
+                    <span class="text-xs text-gray-500">Bestand: {{.StockCurrent}} {{.Unit}} (Min: {{.MinimumStock}})</span>
                   </div>
                 </div>
-                <a href="/employees/view/{{.ID}}" class="inline-flex items-center text-xs font-medium text-green-600 hover:text-green-800">
+                <a href="/articles/view/{{.ID.Hex}}" class="inline-flex items-center text-xs font-medium text-[#FF9800] hover:text-[#e68a00]">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
                     <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
@@ -138,47 +120,47 @@
             </div>
             {{else}}
             <div class="col-span-2 p-4 text-center text-gray-500">
-              Keine Mitarbeiter gefunden
+              Keine Artikel unter Mindestbestand
             </div>
             {{end}}
           </div>
         </div>
       </div>
 
-      <!-- Personalkosten-Diagramm -->
+      <!-- Lager Bewegungen Diagramm -->
       <div class="bg-white rounded-xl shadow-md overflow-hidden">
         <div class="p-4 border-b border-gray-200">
-          <h3 class="text-lg font-semibold text-gray-800">Personalkosten über Zeit (inkl. Arbeitgeberanteil)</h3>
+          <h3 class="text-lg font-semibold text-[#333333]">Lagerbewegungen</h3>
         </div>
         <div class="p-4">
           <div class="relative h-64">
-            <canvas id="laborCostsChart"></canvas>
+            <canvas id="stockMovementChart"></canvas>
           </div>
         </div>
       </div>
 
       <!-- Neue Charts -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Personalkostenverteilung nach Abteilung -->
+        <!-- Kategorie-Verteilung -->
         <div class="bg-white rounded-xl shadow-md overflow-hidden">
           <div class="p-4 border-b border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-800">Personalkosten nach Abteilung</h3>
+            <h3 class="text-lg font-semibold text-[#333333]">Verteilung nach Kategorie</h3>
           </div>
           <div class="p-4">
             <div class="relative h-72">
-              <canvas id="deptCostsChart"></canvas>
+              <canvas id="categoryDistributionChart"></canvas>
             </div>
           </div>
         </div>
 
-        <!-- Altersstruktur -->
+        <!-- Lagerwert pro Kategorie -->
         <div class="bg-white rounded-xl shadow-md overflow-hidden">
           <div class="p-4 border-b border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-800">Altersstruktur</h3>
+            <h3 class="text-lg font-semibold text-[#333333]">Lagerwert pro Kategorie</h3>
           </div>
           <div class="p-4">
             <div class="relative h-72">
-              <canvas id="ageDistributionChart"></canvas>
+              <canvas id="categoryValueChart"></canvas>
             </div>
           </div>
         </div>
@@ -187,41 +169,44 @@
 
     <!-- Rechte Spalte -->
     <div class="space-y-6">
-      <!-- Abteilungsverteilung -->
+      <!-- Kategorie-Verteilung -->
       <div class="bg-white rounded-xl shadow-md overflow-hidden">
         <div class="flex items-center justify-between p-4 border-b border-gray-200">
-          <h3 class="text-lg font-semibold text-gray-800">Abteilungsverteilung</h3>
+          <h3 class="text-lg font-semibold text-[#333333]">Artikelkategorien</h3>
         </div>
         <div class="p-4">
           <div class="h-64">
-            <canvas id="departmentChart"></canvas>
+            <canvas id="categoryChart"></canvas>
           </div>
         </div>
       </div>
 
-      <!-- Anstehende Gespräche -->
+      <!-- Neueste Transaktionen -->
       <div class="bg-white rounded-xl shadow-md overflow-hidden">
         <div class="flex items-center justify-between p-4 border-b border-gray-200">
-          <h3 class="text-lg font-semibold text-gray-800">Anstehende Gespräche</h3>
-          <a href="/employees" class="text-sm text-green-600 hover:underline">Alle anzeigen</a>
+          <h3 class="text-lg font-semibold text-[#333333]">Neueste Transaktionen</h3>
+          <a href="/transactions" class="text-sm text-[#FF9800] hover:text-[#e68a00]">Alle anzeigen</a>
         </div>
         <div class="p-4">
           <ul class="divide-y divide-gray-200">
-            {{range .upcomingReviewsList}}
+            {{range .recentTransactions}}
             <li class="py-3">
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm font-medium text-gray-900">{{.EmployeeName}}</p>
-                  <p class="text-sm text-gray-500">{{.ReviewType}}</p>
+                  <p class="text-sm font-medium text-[#333333]">{{.ArticleName}}</p>
+                  <p class="text-sm text-gray-500">{{.GetDisplayType}}</p>
                 </div>
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                  {{.Date}}
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                   {{if eq .Type "stock_in"}}bg-green-100 text-green-800
+                {{else if eq .Type "stock_out"}}bg-red-100 text-red-800
+                {{else}}bg-blue-100 text-blue-800{{end}}">
+                {{.Quantity}} {{if gt .Quantity 0}}+{{end}}
                 </span>
               </div>
             </li>
             {{else}}
             <li class="py-3 text-center text-gray-500">
-              Keine anstehenden Gespräche
+              Keine Transaktionen gefunden
             </li>
             {{end}}
           </ul>
@@ -231,7 +216,7 @@
       <!-- Letzte Aktivitäten -->
       <div class="bg-white rounded-xl shadow-md overflow-hidden">
         <div class="flex items-center justify-between p-4 border-b border-gray-200">
-          <h3 class="text-lg font-semibold text-gray-800">Letzte Aktivitäten</h3>
+          <h3 class="text-lg font-semibold text-[#333333]">Letzte Aktivitäten</h3>
         </div>
         <div class="p-4">
           <div class="flow-root">
@@ -250,7 +235,7 @@
                     </div>
                     <div class="min-w-0 flex-1">
                       <div>
-                        <div class="text-sm text-gray-500">
+                        <div class="text-sm text-[#333333]">
                           {{.Message | safeHTML}}
                         </div>
                         <p class="mt-0.5 text-sm text-gray-500">{{.Time}}</p>
@@ -278,216 +263,172 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Personalkosten-Diagramm
-    const laborCtx = document.getElementById('laborCostsChart').getContext('2d');
-    const laborCostsChart = new Chart(laborCtx, {
-              type: 'line',
-              data: {
-                labels: ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'],
-                datasets: [
-                  {
-                    label: 'Gesamtpersonalkosten inkl. AG-Anteil (€)',
-                    data: {{.monthlyCostsData}},
-              borderColor: '#16a34a',
-              backgroundColor: 'rgba(22, 163, 74, 0.1)',
-              fill: true,
-              tension: 0.4
-            },
-            {
-              label: 'Durchschnittskosten pro Mitarbeiter inkl. AG-Anteil (€)',
-              data: {{.avgCostsPerEmployeeData}},
-    borderColor: '#3b82f6',
-            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-            fill: true,
+    {{if ne .userRole "user"}}
+    // Lagerbewegungen Diagramm
+    const stockMovementCtx = document.getElementById('stockMovementChart').getContext('2d');
+
+    // Daten für das Diagramm vorbereiten - verwenden der vom Backend übergebenen Daten
+    const stockMovementData = {
+      labels: {{or .monthLabels (slice "Jan" "Feb" "Mär" "Apr" "Mai" "Jun" "Jul" "Aug" "Sep" "Okt" "Nov" "Dez")}},
+    datasets: [
+      {
+        label: 'Wareneingang',
+        data: {{or .stockMovementData.stockIn (slice 0 0 0 0 0 0 0 0 0 0 0 0)}},
+    borderColor: '#16a34a',
+            backgroundColor: 'rgba(22, 163, 74, 0.1)',
+            fill: false,
+            tension: 0.4
+  },
+    {
+      label: 'Warenausgang',
+              data: {{or .stockMovementData.stockOut (slice 0 0 0 0 0 0 0 0 0 0 0 0)}},
+      borderColor: '#ef4444',
+              backgroundColor: 'rgba(239, 68, 68, 0.1)',
+            fill: false,
+            tension: 0.4,
+    },
+    {
+      label: 'Bestandsanpassungen',
+              data: {{or .stockMovementData.adjustment (slice 0 0 0 0 0 0 0 0 0 0 0 0)}},
+      borderColor: '#3b82f6',
+              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            fill: false,
             tension: 0.4,
             borderDash: [5, 5]
-  }
+    }
   ]
-  },
-    options: {
-      responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-        tooltip: {
-          mode: 'index',
-                  intersect: false,
-                  callbacks: {
-            label: function(context) {
-              let label = context.dataset.label || '';
-              if (label) {
-                label += ': ';
-              }
-              if (context.parsed.y !== null) {
-                label += new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(context.parsed.y);
-              }
-              return label;
-            }
+  };
+
+    new Chart(stockMovementCtx, {
+      type: 'line',
+      data: stockMovementData,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          tooltip: {
+            mode: 'index',
+            intersect: false
+          },
+          legend: {
+            position: 'top',
           }
         },
-        legend: {
-          position: 'top',
-        }
-      },
-      scales: {
-        x: {
-          grid: {
-            display: false
-          }
-        },
-        y: {
-          beginAtZero: true,
-                  ticks: {
-            callback: function(value, index, values) {
-              return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(value);
+        scales: {
+          x: {
+            grid: {
+              display: false
             }
+          },
+          y: {
+            beginAtZero: true
           }
         }
       }
-    }
-  });
+    });
 
-    // Abteilungsverteilung-Diagramm
-    const deptCtx = document.getElementById('departmentChart').getContext('2d');
-    const departmentChart = new Chart(deptCtx, {
+    // Kategorie-Diagramm (Donut)
+    const categoryLabels = {{or .categoryLabels (slice "Keine Kategorie")}};
+    const categoryData = {{or .categoryCounts (slice 0)}};
+
+    const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+    new Chart(categoryCtx, {
       type: 'doughnut',
       data: {
-        labels: {{.departmentLabels}},
-    datasets: [{
-      data: {{.departmentData}},
-    backgroundColor: [
-      '#16a34a', // Grün
-      '#3b82f6', // Blau
-      '#f59e0b', // Gelb
-      '#ef4444', // Rot
-      '#8b5cf6', // Lila
-      '#06b6d4'  // Cyan
-    ],
-            hoverOffset: 4
-  }]
-  },
-    options: {
-      responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-        legend: {
-          position: 'bottom',
+        labels: categoryLabels,
+        datasets: [{
+          data: categoryData,
+          backgroundColor: [
+            '#FF9800', // Orange (Primärfarbe)
+            '#3b82f6', // Blau
+            '#f59e0b', // Gelb
+            '#ef4444', // Rot
+            '#8b5cf6', // Lila
+            '#06b6d4'  // Cyan
+          ],
+          hoverOffset: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+          }
+        }
+      }
+    });
+
+    // Kategorie-Verteilung Diagramm
+    const categoryDistributionCtx = document.getElementById('categoryDistributionChart').getContext('2d');
+    new Chart(categoryDistributionCtx, {
+      type: 'bar',
+      data: {
+        labels: categoryLabels,
+        datasets: [{
+          label: 'Anzahl Artikel',
+          data: categoryData,
+          backgroundColor: 'rgba(255, 152, 0, 0.7)', // Orange (Primärfarbe)
+          borderColor: 'rgb(255, 152, 0)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              precision: 0
+            }
+          }
+        }
+      }
+    });
+
+    // Lagerwert pro Kategorie Diagramm
+    const categoryValueCtx = document.getElementById('categoryValueChart').getContext('2d');
+    const categoryValues = {{or .categoryValues (slice 0)}};
+
+    new Chart(categoryValueCtx, {
+      type: 'bar',
+      data: {
+        labels: categoryLabels,
+        datasets: [{
+          label: 'Lagerwert (€)',
+          data: categoryValues,
+          backgroundColor: 'rgba(59, 130, 246, 0.7)', // Blau
+          borderColor: 'rgb(59, 130, 246)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: function(value) {
+                return value.toFixed(2) + ' €';
+              }
+            }
+          }
         },
-        tooltip: {
-          callbacks: {
-            label: function(context) {
-              let label = context.label || '';
-              if (label) {
-                label += ': ';
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return context.dataset.label + ': ' + context.parsed.y.toFixed(2) + ' €';
               }
-              if (context.parsed !== null) {
-                label += context.parsed;
-                label += ' Mitarbeiter';
-              }
-              return label;
-            }
-          }
-        }
-      },
-    }
-  });
-
-    // Personalkostenverteilung nach Abteilung
-    const deptCostsCtx = document.getElementById('deptCostsChart').getContext('2d');
-    const deptCostsChart = new Chart(deptCostsCtx, {
-      type: 'bar',
-      data: {
-        labels: {{.deptCostsLabels}},
-    datasets: [{
-      label: 'Personalkosten (€)',
-      data: {{.deptCostsData}},
-    backgroundColor: [
-      'rgba(22, 163, 74, 0.7)',   // Grün
-      'rgba(59, 130, 246, 0.7)',  // Blau
-      'rgba(245, 158, 11, 0.7)',  // Gelb
-      'rgba(239, 68, 68, 0.7)',   // Rot
-      'rgba(139, 92, 246, 0.7)',  // Lila
-      'rgba(6, 182, 212, 0.7)'    // Cyan
-    ],
-            borderColor: [
-      'rgb(22, 163, 74)',
-      'rgb(59, 130, 246)',
-      'rgb(245, 158, 11)',
-      'rgb(239, 68, 68)',
-      'rgb(139, 92, 246)',
-      'rgb(6, 182, 212)'
-    ],
-            borderWidth: 1
-  }]
-  },
-    options: {
-      responsive: true,
-              maintainAspectRatio: false,
-              scales: {
-        y: {
-          beginAtZero: true,
-                  ticks: {
-            callback: function(value, index, values) {
-              return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(value);
-            }
-          }
-        }
-      },
-      plugins: {
-        tooltip: {
-          callbacks: {
-            label: function(context) {
-              let label = context.dataset.label || '';
-              if (label) {
-                label += ': ';
-              }
-              if (context.parsed.y !== null) {
-                label += new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(context.parsed.y);
-              }
-              return label;
             }
           }
         }
       }
-    }
-  });
-
-    // Altersstruktur
-    const ageCtx = document.getElementById('ageDistributionChart').getContext('2d');
-    const ageChart = new Chart(ageCtx, {
-      type: 'bar',
-      data: {
-        labels: {{.ageGroups}},
-    datasets: [{
-      label: 'Anzahl Mitarbeiter',
-      data: {{.ageCounts}},
-    backgroundColor: 'rgba(59, 130, 246, 0.7)',
-            borderColor: 'rgb(59, 130, 246)',
-            borderWidth: 1
-  }]
-  },
-    options: {
-      responsive: true,
-              maintainAspectRatio: false,
-              scales: {
-        y: {
-          beginAtZero: true,
-                  ticks: {
-            stepSize: 1,
-                    precision: 0
-          }
-        }
-      }
-    }
-  });
-
-    // Filter für Mitarbeiterübersicht
-    const employeeFilter = document.getElementById('employee-filter');
-    if (employeeFilter) {
-      employeeFilter.addEventListener('change', function() {
-        // Hier würde in einer echten Anwendung ein AJAX-Call erfolgen
-        console.log('Filter geändert zu:', this.value);
-      });
-    }
+    });
+    {{end}}
   });
 </script>
 </body>

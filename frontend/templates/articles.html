@@ -1,6 +1,6 @@
 <!-- frontend/templates/articles.html -->
 {{ template "head" . }}
-<body class="bg-gray-50 min-h-screen flex flex-col">
+<body class="bg-[#F5F5DC] min-h-screen flex flex-col">
 <!-- Navigation -->
 {{ template "navigation" . }}
 
@@ -9,14 +9,14 @@
     <div class="sm:flex sm:items-center sm:justify-between">
         <div>
             <div class="flex items-center gap-x-3">
-                <h2 class="text-lg font-medium text-gray-800">Artikel</h2>
+                <h2 class="text-lg font-medium text-[#333333]">Artikel</h2>
                 <span class="px-3 py-1 text-xs text-blue-600 bg-blue-100 rounded-full">{{.totalArticles}} Artikel</span>
             </div>
             <p class="mt-1 text-sm text-gray-500">Verwalten Sie Ihr Lager und die Artikeldaten.</p>
         </div>
 
         <div class="flex items-center mt-4 gap-x-3">
-            <a href="/articles/add" class="flex items-center justify-center px-5 py-2 text-sm tracking-wide text-white transition-colors duration-200 bg-green-600 rounded-lg gap-x-2 sm:w-auto hover:bg-green-500">
+            <a href="/articles/add" class="flex items-center justify-center px-5 py-2 text-sm tracking-wide text-white transition-colors duration-200 bg-[#FF9800] rounded-lg gap-x-2 sm:w-auto hover:bg-[#e68a00]">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path fill-rule="evenodd" clip-rule="evenodd" d="M10 5C10.5523 5 11 5.44772 11 6V9H14C14.5523 9 15 9.44772 15 10C15 10.5523 14.5523 11 14 11H11V14C11 14.5523 10.5523 15 10 15C9.44772 15 9 14.5523 9 14V11H6C5.44772 11 5 10.5523 5 10C5 9.44772 5.44772 9 6 9H9V6C9 5.44772 9.44772 5 10 5Z" fill="currentColor" />
                 </svg>
@@ -33,31 +33,31 @@
                 </svg>
             </span>
 
-            <input type="text" id="searchInput" placeholder="Suchen" class="block w-full py-1.5 pr-5 text-gray-700 bg-white border border-gray-200 rounded-lg md:w-80 placeholder-gray-400/70 pl-11 rtl:pr-11 rtl:pl-5 focus:border-green-400 focus:ring-green-300 focus:outline-none focus:ring focus:ring-opacity-40">
+            <input type="text" id="searchInput" placeholder="Suchen" class="block w-full py-1.5 pr-5 text-[#333333] bg-white border border-gray-200 rounded-lg md:w-80 placeholder-gray-400/70 pl-11 rtl:pr-11 rtl:pl-5 focus:border-[#FF9800] focus:ring-[#FF9800]/30 focus:outline-none focus:ring focus:ring-opacity-40">
         </div>
     </div>
 
     <!-- Liste mit Artikeln -->
     <div class="mt-6 bg-white border border-gray-200 rounded-xl overflow-hidden">
         <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+            <thead class="bg-[#F5F5DC]">
             <tr>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Artikelnummer</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bezeichnung</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategorie</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bestand</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Verkaufspreis</th>
-                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aktionen</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-[#333333] uppercase tracking-wider">Artikelnummer</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-[#333333] uppercase tracking-wider">Bezeichnung</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-[#333333] uppercase tracking-wider">Kategorie</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-[#333333] uppercase tracking-wider">Bestand</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-[#333333] uppercase tracking-wider">Verkaufspreis</th>
+                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-[#333333] uppercase tracking-wider">Aktionen</th>
             </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
             {{range .articles}}
             <tr class="article-item">
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{.ArticleNumber}}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-[#333333]">{{.ArticleNumber}}</td>
                 <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center">
                         <div class="ml-4">
-                            <div class="text-sm font-medium text-gray-900">{{.ShortName}}</div>
+                            <div class="text-sm font-medium text-[#333333]">{{.ShortName}}</div>
                             <div class="text-sm text-gray-500">{{if .EAN}}EAN: {{.EAN}}{{end}}</div>
                         </div>
                     </div>
@@ -66,12 +66,12 @@
                 <td class="px-6 py-4 whitespace-nowrap">
                     {{if .IsBelowMinimum}}
                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-        {{printf "%.2f" .StockCurrent}} {{.Unit}}
-    </span>
+                      {{printf "%.2f" .StockCurrent}} {{.Unit}}
+                    </span>
                     {{else}}
-                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-        {{printf "%.2f" .StockCurrent}} {{.Unit}}
-    </span>
+                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-[#FF9800]/20 text-[#FF9800]">
+                      {{printf "%.2f" .StockCurrent}} {{.Unit}}
+                    </span>
                     {{end}}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -79,7 +79,7 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <a href="/articles/view/{{.ID.Hex}}" class="text-blue-600 hover:text-blue-900 mr-3">Details</a>
-                    <a href="/articles/edit/{{.ID.Hex}}" class="text-green-600 hover:text-green-900 mr-3">Bearbeiten</a>
+                    <a href="/articles/edit/{{.ID.Hex}}" class="text-[#FF9800] hover:text-[#e68a00] mr-3">Bearbeiten</a>
                     <a href="#" data-id="{{.ID.Hex}}" class="text-red-600 hover:text-red-900 delete-article">Löschen</a>
                 </td>
             </tr>
@@ -105,12 +105,12 @@
                     <svg class="h-12 w-12 text-red-500 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
-                    <h3 class="text-lg font-medium text-gray-900 mb-2">Artikel löschen</h3>
+                    <h3 class="text-lg font-medium text-[#333333] mb-2">Artikel löschen</h3>
                     <p class="text-sm text-gray-500">Sind Sie sicher, dass Sie diesen Artikel löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.</p>
                 </div>
             </div>
-            <div class="px-6 py-3 bg-gray-50 flex justify-end space-x-3 rounded-b-lg">
-                <button type="button" onclick="closeModal('deleteConfirmModal')" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+            <div class="px-6 py-3 bg-[#F5F5DC] flex justify-end space-x-3 rounded-b-lg">
+                <button type="button" onclick="closeModal('deleteConfirmModal')" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-[#333333] bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FF9800]">
                     Abbrechen
                 </button>
                 <button id="confirmDeleteBtn" type="button" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
