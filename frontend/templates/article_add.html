@@ -73,8 +73,27 @@
                             <input type="number" name="stockReserved" id="stockReserved" step="0.001" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FF9800] focus:ring-[#FF9800]">
                         </div>
                         <div>
-                            <label for="storageLocation" class="block text-sm font-medium text-gray-700">Lagerort</label>
-                            <input type="text" name="storageLocation" id="storageLocation" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FF9800] focus:ring-[#FF9800]">
+                            <label for="storageLocation" class="block text-sm font-medium text-[#333333]">Lagerort</label>
+                            <select name="storageLocation" id="storageLocation" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FF9800] focus:ring-[#FF9800]">
+                                <option value="">-- Bitte wählen --</option>
+                                {{range .locations}}
+                                {{if eq .Type "warehouse"}}
+                                <optgroup label="{{.Name}}">
+                                    {{range $.locationsByParent.warehouse}}
+                                    {{if eq .ParentID.Hex $.ID.Hex}}
+                                <optgroup label="&nbsp;&nbsp;{{.Name}}">
+                                    {{range $.locationsByParent.area}}
+                                    {{if eq .ParentID.Hex $.ID.Hex}}
+                                    <option value="{{.ID.Hex}}">{{$.Name}} > {{.Name}} > {{$.Name}}</option>
+                                    {{end}}
+                                    {{end}}
+                                </optgroup>
+                                {{end}}
+                                {{end}}
+                                </optgroup>
+                                {{end}}
+                                {{end}}
+                            </select>
                         </div>
                         <div>
                             <label for="supplierNumber" class="block text-sm font-medium text-gray-700">Lieferantennr.</label>

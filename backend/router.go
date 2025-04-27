@@ -253,6 +253,16 @@ func InitializeRoutes(router *gin.Engine) {
 		authorized.DELETE("/articles/delete/:id", articleHandler.DeleteArticle)
 		authorized.GET("/stock", articleHandler.ShowStockOverview)
 
+		// Lagerort-Routen
+		locationHandler := handler.NewLocationHandler()
+		authorized.GET("/locations", locationHandler.ListLocations)
+		authorized.GET("/locations/add", locationHandler.ShowAddLocationForm)
+		authorized.POST("/locations/add", locationHandler.AddLocation)
+		authorized.GET("/locations/edit/:id", locationHandler.ShowEditLocationForm)
+		authorized.POST("/locations/edit/:id", locationHandler.UpdateLocation)
+		authorized.DELETE("/locations/delete/:id", locationHandler.DeleteLocation)
+		authorized.GET("/api/locations/:id/children", locationHandler.GetLocationChildren)
+
 		// Transaktions-Routen
 		transactionHandler := handler.NewTransactionHandler()
 		authorized.GET("/transactions", transactionHandler.ListTransactions)

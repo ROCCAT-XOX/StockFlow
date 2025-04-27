@@ -38,6 +38,7 @@ type Article struct {
 	LastStockTakeDate     time.Time          `bson:"lastStockTakeDate" json:"lastStockTakeDate"`         // Letztes Inventurdatum (neu)
 	CreatedAt             time.Time          `bson:"createdAt" json:"createdAt"`                         // Erstellungsdatum
 	UpdatedAt             time.Time          `bson:"updatedAt" json:"updatedAt"`                         // Aktualisierungsdatum
+	StorageLocationID     primitive.ObjectID `bson:"storageLocationId,omitempty" json:"storageLocationId,omitempty"`
 }
 
 // GetStockStatus gibt den Bestandsstatus zurück (zu niedrig, optimal, zu hoch)

@@ -63,24 +63,49 @@ func (h *ArticleHandler) ShowAddArticleForm(c *gin.Context) {
 	user, _ := c.Get("user")
 	userModel := user.(*model.User)
 
-	// Nächste Artikelnummer generieren (für Formularvorausfüllung)
-	nextArticleNumber, _ := h.articleRepo.GetNextArticleNumber()
-
 	// Lieferanten für Dropdown abrufen
 	suppliers, err := h.supplierRepo.FindAll()
 	if err != nil {
 		suppliers = []*model.Supplier{} // Leere Liste im Fehlerfall
 	}
 
+	// Lagerorte laden
+	locationRepo := repository.NewLocationRepository()
+	locations, err := locationRepo.FindAll()
+	if err != nil {
+		locations = []*model.Location{} // Leere Liste im Fehlerfall
+	}
+
+	// Lagerorte nach Typ und Parent-ID gruppieren
+	warehouseLocations := make([]*model.Location, 0)
+	areaLocations := make([]*model.Location, 0)
+	shelfLocations := make([]*model.Location, 0)
+
+	for _, loc := range locations {
+		switch loc.Type {
+		case model.LocationTypeWarehouse:
+			warehouseLocations = append(warehouseLocations, loc)
+		case model.LocationTypeArea:
+			areaLocations = append(areaLocations, loc)
+		case model.LocationTypeShelf:
+			shelfLocations = append(shelfLocations, loc)
+		}
+	}
+
 	c.HTML(http.StatusOK, "article_add.html", gin.H{
-		"title":             "Artikel hinzufügen",
-		"active":            "articles",
-		"user":              userModel.FirstName + " " + userModel.LastName,
-		"email":             userModel.Email,
-		"year":              time.Now().Year(),
-		"userRole":          c.GetString("userRole"),
-		"suppliers":         suppliers,
-		"nextArticleNumber": nextArticleNumber,
+		"title":     "Artikel hinzufügen",
+		"active":    "articles",
+		"user":      userModel.FirstName + " " + userModel.LastName,
+		"email":     userModel.Email,
+		"year":      time.Now().Year(),
+		"userRole":  c.GetString("userRole"),
+		"suppliers": suppliers,
+		"locations": locations,
+		"locationsByParent": map[string][]*model.Location{
+			"warehouse": warehouseLocations,
+			"area":      areaLocations,
+			"shelf":     shelfLocations,
+		},
 	})
 }
 
@@ -100,10 +125,25 @@ func (h *ArticleHandler) AddArticle(c *gin.Context) {
 	bin := c.PostForm("bin")
 	isActive := c.PostForm("isActive") == "on"
 
+	// Storage Location ID verarbeiten
+	storageLocationIDStr := c.PostForm("storageLocation")
+	var storageLocationID primitive.ObjectID
+	if storageLocationIDStr != "" {
+		var err error
+		storageLocationID, err = primitive.ObjectIDFromHex(storageLocationIDStr)
+		if err != nil {
+			// Handle error, falls nötig
+		}
+	}
+
 	// Zusätzliche Werte parsen
 	var supplierID primitive.ObjectID
 	if supplierIDStr != "" {
-		supplierID, _ = primitive.ObjectIDFromHex(supplierIDStr)
+		var err error
+		supplierID, err = primitive.ObjectIDFromHex(supplierIDStr)
+		if err != nil {
+			// Handle error, falls nötig
+		}
 	}
 
 	maximumStock, _ := strconv.ParseFloat(maximumStockStr, 64)
@@ -123,7 +163,7 @@ func (h *ArticleHandler) AddArticle(c *gin.Context) {
 
 	// Neuen Artikel erstellen
 	article := &model.Article{
-		ArticleNumber:         articleNumber, // Wird automatisch überschrieben, wenn bereits vorhanden oder leer
+		ArticleNumber:         articleNumber,
 		ShortName:             shortName,
 		LongName:              longName,
 		EAN:                   ean,
@@ -137,6 +177,7 @@ func (h *ArticleHandler) AddArticle(c *gin.Context) {
 		SupplierNumber:        c.PostForm("supplierNumber"),
 		DeliveryTimeInDays:    deliveryTimeInDays,
 		StorageLocation:       c.PostForm("storageLocation"),
+		StorageLocationID:     storageLocationID, // Neues Feld für die Lagerort-ID
 		WeightKg:              weightKg,
 		Dimensions:            c.PostForm("dimensions"),
 		SerialNumberRequired:  serialNumberRequired,
@@ -253,6 +294,7 @@ func (h *ArticleHandler) ShowStockOverview(c *gin.Context) {
 }
 
 // GetArticleDetails zeigt die Details eines Artikels an
+// Im ArticleHandler.GetArticleDetails
 func (h *ArticleHandler) GetArticleDetails(c *gin.Context) {
 	id := c.Param("id")
 
@@ -271,15 +313,23 @@ func (h *ArticleHandler) GetArticleDetails(c *gin.Context) {
 	user, _ := c.Get("user")
 	userModel := user.(*model.User)
 
+	// Wenn die Lagerort-ID gesetzt ist, laden wir den vollständigen Pfad
+	var locationPath string
+	if !article.StorageLocationID.IsZero() {
+		locationRepo := repository.NewLocationRepository()
+		locationPath, _ = locationRepo.GetLocationPath(article.StorageLocationID.Hex())
+	}
+
 	// Daten an das Template übergeben
 	c.HTML(http.StatusOK, "article_detail.html", gin.H{
-		"title":    article.ShortName,
-		"active":   "articles",
-		"user":     userModel.FirstName + " " + userModel.LastName,
-		"email":    userModel.Email,
-		"year":     time.Now().Year(),
-		"article":  article,
-		"userRole": c.GetString("userRole"),
+		"title":        article.ShortName,
+		"active":       "articles",
+		"user":         userModel.FirstName + " " + userModel.LastName,
+		"email":        userModel.Email,
+		"year":         time.Now().Year(),
+		"article":      article,
+		"userRole":     c.GetString("userRole"),
+		"locationPath": locationPath,
 	})
 }
 
@@ -302,14 +352,50 @@ func (h *ArticleHandler) ShowEditArticleForm(c *gin.Context) {
 	user, _ := c.Get("user")
 	userModel := user.(*model.User)
 
+	// Lieferanten für Dropdown abrufen
+	suppliers, err := h.supplierRepo.FindAll()
+	if err != nil {
+		suppliers = []*model.Supplier{} // Leere Liste im Fehlerfall
+	}
+
+	// Lagerorte laden
+	locationRepo := repository.NewLocationRepository()
+	locations, err := locationRepo.FindAll()
+	if err != nil {
+		locations = []*model.Location{} // Leere Liste im Fehlerfall
+	}
+
+	// Lagerorte nach Typ und Parent-ID gruppieren
+	warehouseLocations := make([]*model.Location, 0)
+	areaLocations := make([]*model.Location, 0)
+	shelfLocations := make([]*model.Location, 0)
+
+	for _, loc := range locations {
+		switch loc.Type {
+		case model.LocationTypeWarehouse:
+			warehouseLocations = append(warehouseLocations, loc)
+		case model.LocationTypeArea:
+			areaLocations = append(areaLocations, loc)
+		case model.LocationTypeShelf:
+			shelfLocations = append(shelfLocations, loc)
+		}
+	}
+
 	c.HTML(http.StatusOK, "article_edit.html", gin.H{
-		"title":    "Artikel bearbeiten",
-		"active":   "articles",
-		"user":     userModel.FirstName + " " + userModel.LastName,
-		"email":    userModel.Email,
-		"year":     time.Now().Year(),
-		"article":  article,
-		"userRole": c.GetString("userRole"),
+		"title":     "Artikel bearbeiten",
+		"active":    "articles",
+		"user":      userModel.FirstName + " " + userModel.LastName,
+		"email":     userModel.Email,
+		"year":      time.Now().Year(),
+		"article":   article,
+		"userRole":  c.GetString("userRole"),
+		"suppliers": suppliers,
+		"locations": locations,
+		"locationsByParent": map[string][]*model.Location{
+			"warehouse": warehouseLocations,
+			"area":      areaLocations,
+			"shelf":     shelfLocations,
+		},
 	})
 }
 
@@ -336,6 +422,17 @@ func (h *ArticleHandler) UpdateArticle(c *gin.Context) {
 	article.Category = c.PostForm("category")
 	article.Unit = c.PostForm("unit")
 
+	// Storage Location ID verarbeiten
+	storageLocationIDStr := c.PostForm("storageLocation")
+	if storageLocationIDStr != "" {
+		storageLocationID, err := primitive.ObjectIDFromHex(storageLocationIDStr)
+		if err == nil { // Nur setzen, wenn die Konvertierung erfolgreich war
+			article.StorageLocationID = storageLocationID
+		}
+	} else {
+		article.StorageLocationID = primitive.NilObjectID
+	}
+
 	// Numerische Werte parsen
 	article.StockCurrent, _ = strconv.ParseFloat(c.PostForm("stockCurrent"), 64)
 	article.StockReserved, _ = strconv.ParseFloat(c.PostForm("stockReserved"), 64)
@@ -350,6 +447,13 @@ func (h *ArticleHandler) UpdateArticle(c *gin.Context) {
 	article.SerialNumberRequired = c.PostForm("serialNumberRequired") == "on"
 	article.HazardClass = c.PostForm("hazardClass")
 	article.Notes = c.PostForm("notes")
+	article.UpdatedAt = time.Now()
+
+	// Optional: Weitere Felder wie MaximumStock, ReorderQuantity, etc. aktualisieren
+	// article.MaximumStock, _ = strconv.ParseFloat(c.PostForm("maximumStock"), 64)
+	// article.ReorderQuantity, _ = strconv.ParseFloat(c.PostForm("reorderQuantity"), 64)
+	// article.Bin = c.PostForm("bin")
+	// article.IsActive = c.PostForm("isActive") == "on"
 
 	// Artikel in der Datenbank aktualisieren
 	err = h.articleRepo.Update(article)

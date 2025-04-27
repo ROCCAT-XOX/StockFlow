@@ -1,0 +1,191 @@
+<!-- frontend/templates/location_edit.html -->
+{{ template "head" . }}
+<body class="bg-[#F5F5DC] min-h-screen flex flex-col">
+<!-- Navigation -->
+{{ template "navigation" . }}
+
+<!-- Main Content -->
+<main class="container mx-auto px-4 py-6 flex-grow">
+    <div class="mb-6">
+        <div class="flex items-center">
+            <a href="/locations" class="text-gray-500 hover:text-[#333333] mr-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+            </a>
+            <h1 class="text-2xl font-bold text-[#333333]">Lagerort bearbeiten</h1>
+        </div>
+    </div>
+
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <form action="/locations/edit/{{.location.ID.Hex}}" method="POST" class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Grunddaten -->
+                <div class="col-span-2">
+                    <h3 class="text-lg font-medium text-[#333333] mb-4">Grunddaten</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="type" class="block text-sm font-medium text-[#333333]">Typ*</label>
+                            <select name="type" id="type" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FF9800] focus:ring-[#FF9800]">
+                                <option value="warehouse" {{if eq .location.Type "warehouse"}}selected{{end}}>Hauptlager</option>
+                                <option value="area" {{if eq .location.Type "area"}}selected{{end}}>Regal/Bereich</option>
+                                <option value="shelf" {{if eq .location.Type "shelf"}}selected{{end}}>Fach</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-[#333333]">Name*</label>
+                            <input type="text" name="name" id="name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FF9800] focus:ring-[#FF9800]" value="{{.location.Name}}">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Beschreibung -->
+                <div class="col-span-2">
+                    <label for="description" class="block text-sm font-medium text-[#333333]">Beschreibung</label>
+                    <textarea name="description" id="description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FF9800] focus:ring-[#FF9800]">{{.location.Description}}</textarea>
+                </div>
+
+                <!-- Übergeordneter Ort (nur für Regal/Bereich und Fach) -->
+                <div id="parent-section" class="col-span-2 {{if eq .location.Type "warehouse"}}hidden{{end}}">
+                <label for="parentId" class="block text-sm font-medium text-[#333333]">Übergeordneter Ort*</label>
+                <select name="parentId" id="parentId" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FF9800] focus:ring-[#FF9800]">
+                    <option value="">-- Bitte wählen --</option>
+                    {{range .locations}}
+                    {{if and (ne .ID.Hex $.location.ID.Hex) (eq .Type "warehouse")}}
+                    <option value="{{.ID.Hex}}" {{if eq $.location.ParentID.Hex .ID.Hex}}selected{{end}} data-type="warehouse">{{.Name}}</option>
+                    {{end}}
+                    {{if and (ne .ID.Hex $.location.ID.Hex) (eq .Type "area")}}
+                    <option value="{{.ID.Hex}}" {{if eq $.location.ParentID.Hex .ID.Hex}}selected{{end}} data-type="area">{{.Name}}</option>
+                    {{end}}
+                    {{end}}
+                </select>
+            </div>
+
+            <!-- Adresse (nur für Hauptlager) -->
+            <!-- Adresse (nur für Hauptlager) -->
+            <div id="address-section" class="col-span-2 {{if ne .location.Type "warehouse"}}hidden{{end}}">
+            <label for="address" class="block text-sm font-medium text-[#333333]">Adresse</label>
+            <textarea name="address" id="address" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FF9800] focus:ring-[#FF9800]">{{.location.Address}}</textarea>
+    </div>
+
+    <!-- Status -->
+    <div class="col-span-2">
+        <div class="flex items-center">
+            <input type="checkbox" name="isActive" id="isActive" class="h-4 w-4 text-[#FF9800] focus:ring-[#FF9800] border-gray-300 rounded" {{if .location.IsActive}}checked{{end}}>
+            <label for="isActive" class="ml-2 block text-sm text-[#333333]">Aktiv</label>
+        </div>
+    </div>
+    </div>
+
+    <div class="mt-8 flex justify-end">
+        <a href="/locations" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-[#333333] bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FF9800] mr-3">
+            Abbrechen
+        </a>
+        <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-[#FF9800] hover:bg-[#e68a00] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FF9800]">
+            Speichern
+        </button>
+    </div>
+    </form>
+    </div>
+</main>
+
+<!-- Footer -->
+{{ template "footer" . }}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const typeSelect = document.getElementById('type');
+        const parentSection = document.getElementById('parent-section');
+        const addressSection = document.getElementById('address-section');
+        const parentSelect = document.getElementById('parentId');
+        const originalType = "{{.location.Type}}";
+
+        // Initiale Zustandsaktualisierung
+        updateFormState();
+
+        // Event-Listener für Änderungen am Typ
+        if (typeSelect) {
+            typeSelect.addEventListener('change', updateFormState);
+        }
+
+        // Event-Listener für Form-Validierung
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const type = typeSelect.value;
+
+                // Validieren der Pflichtfelder basierend auf dem Typ
+                if (type !== 'warehouse' && (!parentSelect.value || parentSelect.value === '')) {
+                    e.preventDefault();
+                    alert('Bitte wählen Sie einen übergeordneten Ort aus.');
+                    return false;
+                }
+
+                // Für Regale überprüfen, ob der übergeordnete Ort ein Hauptlager ist
+                if (type === 'area') {
+                    const selectedOption = parentSelect.options[parentSelect.selectedIndex];
+                    if (selectedOption && selectedOption.getAttribute('data-type') !== 'warehouse') {
+                        e.preventDefault();
+                        alert('Für ein Regal muss der übergeordnete Ort ein Hauptlager sein.');
+                        return false;
+                    }
+                }
+
+                // Für Fächer überprüfen, ob der übergeordnete Ort ein Regal ist
+                if (type === 'shelf') {
+                    const selectedOption = parentSelect.options[parentSelect.selectedIndex];
+                    if (selectedOption && selectedOption.getAttribute('data-type') !== 'area') {
+                        e.preventDefault();
+                        alert('Für ein Fach muss der übergeordnete Ort ein Regal sein.');
+                        return false;
+                    }
+                }
+            });
+        }
+
+        // Funktion zum Aktualisieren des Formularstatus basierend auf dem ausgewählten Typ
+        function updateFormState() {
+            const type = typeSelect.value;
+
+            if (type === 'warehouse') {
+                // Hauptlager benötigt keinen übergeordneten Ort, aber eine Adresse
+                parentSection.classList.add('hidden');
+                addressSection.classList.remove('hidden');
+                parentSelect.removeAttribute('required');
+            } else {
+                // Regale und Fächer benötigen einen übergeordneten Ort, aber keine Adresse
+                parentSection.classList.remove('hidden');
+                addressSection.classList.add('hidden');
+                parentSelect.setAttribute('required', 'required');
+
+                // Filtern der Optionen im Select basierend auf dem Typ
+                Array.from(parentSelect.options).forEach(option => {
+                    if (type === 'area') {
+                        // Regale können nur Hauptlagern zugeordnet werden
+                        option.style.display = option.getAttribute('data-type') === 'warehouse' ? '' : 'none';
+                    } else if (type === 'shelf') {
+                        // Fächer können nur Regalen zugeordnet werden
+                        option.style.display = option.getAttribute('data-type') === 'area' ? '' : 'none';
+                    }
+                });
+
+                // Sicherstellen, dass eine gültige Option ausgewählt ist
+                if (parentSelect.options[parentSelect.selectedIndex] &&
+                    parentSelect.options[parentSelect.selectedIndex].style.display === 'none') {
+                    parentSelect.value = '';
+                }
+            }
+        }
+
+        // Warnung anzeigen, wenn der Typ geändert wird
+        if (typeSelect) {
+            typeSelect.addEventListener('change', function() {
+                if (this.value !== originalType) {
+                    alert('Hinweis: Die Änderung des Typs kann Auswirkungen auf die bestehende Lagerhierarchie haben.');
+                }
+            });
+        }
+    });
+</script>
+</body>
+</html>

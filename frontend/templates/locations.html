@@ -1,0 +1,299 @@
+<!-- frontend/templates/locations.html -->
+{{ template "head" . }}
+<body class="bg-[#F5F5DC] min-h-screen flex flex-col">
+<!-- Navigation -->
+{{ template "navigation" . }}
+
+<!-- Main Content -->
+<main class="container mx-auto px-4 py-6 flex-grow">
+    <div class="sm:flex sm:items-center sm:justify-between">
+        <div>
+            <div class="flex items-center gap-x-3">
+                <h2 class="text-lg font-medium text-[#333333]">Lagerorte</h2>
+                <span class="px-3 py-1 text-xs text-blue-600 bg-blue-100 rounded-full">{{len .locations}} Lagerorte</span>
+            </div>
+            <p class="mt-1 text-sm text-gray-500">Verwalten Sie Ihre Lagerstandorte, Regale und Fächer.</p>
+        </div>
+
+        <div class="flex items-center mt-4 gap-x-3">
+            <div class="relative">
+                <button id="addLocationButton" class="flex items-center justify-center px-5 py-2 text-sm tracking-wide text-white transition-colors duration-200 bg-[#FF9800] rounded-lg gap-x-2 sm:w-auto hover:bg-[#e68a00]">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M10 5C10.5523 5 11 5.44772 11 6V9H14C14.5523 9 15 9.44772 15 10C15 10.5523 14.5523 11 14 11H11V14C11 14.5523 10.5523 15 10 15C9.44772 15 9 14.5523 9 14V11H6C5.44772 11 5 10.5523 5 10C5 9.44772 5.44772 9 6 9H9V6C9 5.44772 9.44772 5 10 5Z" fill="currentColor" />
+                    </svg>
+                    <span>Lagerort hinzufügen</span>
+                </button>
+                <div id="locationTypeDropdown" class="absolute right-0 z-10 w-56 mt-2 origin-top-right bg-white rounded-md shadow-lg hidden">
+                    <div class="p-2">
+                        <a href="/locations/add?type=warehouse" class="block px-4 py-2 text-sm text-[#333333] rounded-lg hover:bg-[#F5F5DC]">
+                            Hauptlager hinzufügen
+                        </a>
+                        <a href="/locations/add?type=area" class="block px-4 py-2 text-sm text-[#333333] rounded-lg hover:bg-[#F5F5DC]">
+                            Regal/Bereich hinzufügen
+                        </a>
+                        <a href="/locations/add?type=shelf" class="block px-4 py-2 text-sm text-[#333333] rounded-lg hover:bg-[#F5F5DC]">
+                            Fach hinzufügen
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-6 md:flex md:items-center md:justify-between">
+        <div class="relative flex items-center mt-4 md:mt-0">
+            <span class="absolute">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mx-3 text-gray-400">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                </svg>
+            </span>
+
+            <input type="text" id="searchInput" placeholder="Lagerort suchen" class="block w-full py-1.5 pr-5 text-[#333333] bg-white border border-gray-200 rounded-lg md:w-80 placeholder-gray-400/70 pl-11 rtl:pr-11 rtl:pl-5 focus:border-[#FF9800] focus:ring-[#FF9800]/30 focus:outline-none focus:ring focus:ring-opacity-40">
+        </div>
+    </div>
+
+    <!-- Lagerort-Hierarchie -->
+    <div class="mt-6 bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <div class="overflow-x-auto">
+            <div class="inline-block min-w-full align-middle">
+                <div class="overflow-hidden shadow">
+                    <!-- Lagerort-Baum -->
+                    <div class="location-tree p-4">
+                        {{range .warehouses}}
+                        <div class="location-item warehouse mb-4">
+                            <div class="flex items-center justify-between p-3 bg-[#F5F5DC] rounded-lg mb-2">
+                                <div class="flex items-center">
+                                    <span class="text-lg font-medium text-[#333333]">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                        </svg>
+                                        {{.Name}}
+                                    </span>
+                                    {{if .Address}}
+                                    <span class="ml-3 text-sm text-gray-500">{{.Address}}</span>
+                                    {{end}}
+                                </div>
+                                <div class="flex space-x-2">
+                                    <a href="/locations/add?type=area&parent={{.ID.Hex}}" class="text-[#FF9800] hover:text-[#e68a00]">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                        </svg>
+                                    </a>
+                                    <a href="/locations/edit/{{.ID.Hex}}" class="text-blue-600 hover:text-blue-800">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </a>
+                                    <a href="#" data-id="{{.ID.Hex}}" class="text-red-600 hover:text-red-800 delete-location">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Areas unter diesem Warehouse -->
+                            <div class="pl-6">
+                                {{range $.locations}}
+                                {{if and (eq .Type "area") (eq .ParentID.Hex $.ID.Hex)}}
+                                <div class="location-item area mb-2">
+                                    <div class="flex items-center justify-between p-2 bg-white border border-gray-200 rounded-lg mb-2">
+                                        <div class="flex items-center">
+                                            <span class="text-md font-medium text-[#333333]">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" />
+                                                </svg>
+                                                {{.Name}}
+                                            </span>
+                                        </div>
+                                        <div class="flex space-x-2">
+                                            <a href="/locations/add?type=shelf&parent={{.ID.Hex}}" class="text-[#FF9800] hover:text-[#e68a00]">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                                </svg>
+                                            </a>
+                                            <a href="/locations/edit/{{.ID.Hex}}" class="text-blue-600 hover:text-blue-800">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                </svg>
+                                            </a>
+                                            <a href="#" data-id="{{.ID.Hex}}" class="text-red-600 hover:text-red-800 delete-location">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <!-- Shelves unter diesem Area -->
+                                    <div class="pl-6">
+                                        {{$areaID := .ID.Hex}}
+                                        {{range $.locations}}
+                                        {{if and (eq .Type "shelf") (eq .ParentID.Hex $areaID)}}
+                                        <div class="location-item shelf mb-2">
+                                            <div class="flex items-center justify-between p-2 bg-white border border-gray-100 rounded-lg">
+                                                <div class="flex items-center">
+                                                    <span class="text-sm font-medium text-[#333333]">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                                        </svg>
+                                                        {{.Name}}
+                                                    </span>
+                                                </div>
+                                                <div class="flex space-x-2">
+                                                    <a href="/locations/edit/{{.ID.Hex}}" class="text-blue-600 hover:text-blue-800">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                        </svg>
+                                                    </a>
+                                                    <a href="#" data-id="{{.ID.Hex}}" class="text-red-600 hover:text-red-800 delete-location">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                        </svg>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {{end}}
+                                        {{end}}
+                                    </div>
+                                </div>
+                                {{end}}
+                                {{end}}
+                            </div>
+                        </div>
+                        {{else}}
+                        <div class="text-center py-4 text-gray-500">
+                            Keine Lagerorte gefunden. Fügen Sie einen neuen Lagerort hinzu.
+                        </div>
+                        {{end}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Modal zur Bestätigung des Löschens -->
+<div id="deleteConfirmModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" aria-hidden="true"></div>
+        <div class="relative bg-white rounded-lg max-w-md w-full mx-auto shadow-xl">
+            <div class="px-6 py-4">
+                <div class="text-center">
+                    <svg class="h-12 w-12 text-red-500 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <h3 class="text-lg font-medium text-[#333333] mb-2">Lagerort löschen</h3>
+                    <p id="delete-message" class="text-sm text-gray-500">Sind Sie sicher, dass Sie diesen Lagerort löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.</p>
+                </div>
+            </div>
+            <div class="px-6 py-3 bg-[#F5F5DC] flex justify-end space-x-3 rounded-b-lg">
+                <button type="button" onclick="closeModal('deleteConfirmModal')" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-[#333333] bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FF9800]">
+                    Abbrechen
+                </button>
+                <button id="confirmDeleteBtn" type="button" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                    Löschen
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+{{ template "footer" . }}
+
+<script>
+    // Modal-Funktionen
+    function openModal(id) {
+        document.getElementById(id).classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Dropdown-Funktionalität für den Hinzufügen-Button
+        const addButton = document.getElementById('addLocationButton');
+        const dropdown = document.getElementById('locationTypeDropdown');
+
+        if (addButton && dropdown) {
+            addButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                dropdown.classList.toggle('hidden');
+            });
+
+            // Dropdown bei Klick außerhalb schließen
+            document.addEventListener('click', function(e) {
+                if (!addButton.contains(e.target) && !dropdown.contains(e.target)) {
+                    dropdown.classList.add('hidden');
+                }
+            });
+        }
+
+        // Suchfunktion
+        const searchInput = document.getElementById('searchInput');
+        const locationItems = document.querySelectorAll('.location-item');
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+
+                locationItems.forEach(item => {
+                    const text = item.textContent.toLowerCase();
+                    if (text.includes(searchTerm)) {
+                        item.style.display = '';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        // Löschen-Bestätigung
+        const deleteButtons = document.querySelectorAll('.delete-location');
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const locationId = this.getAttribute('data-id');
+                confirmDeleteBtn.setAttribute('data-id', locationId);
+                openModal('deleteConfirmModal');
+            });
+        });
+
+        if (confirmDeleteBtn) {
+            confirmDeleteBtn.addEventListener('click', function() {
+                const locationId = this.getAttribute('data-id');
+
+                // AJAX-Call zum Löschen des Lagerorts
+                fetch('/locations/delete/' + locationId, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        closeModal('deleteConfirmModal');
+                        if (data.error) {
+                            alert(data.error);
+                        } else {
+                            // Seite neu laden, um die Änderungen anzuzeigen
+                            window.location.reload();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.');
+                    });
+            });
+        }
+    });
+</script>
+</body>
+</html>
