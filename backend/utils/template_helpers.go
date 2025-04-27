@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html/template"
 	"math"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -103,5 +104,47 @@ func TemplateHelpers() template.FuncMap {
 			return a - b
 		},
 		"getInitials": GetInitials, // Neue Hilfsfunktion hinzugefügt
+
+		// Neue Hilfsfunktionen für die Formatierung von Gleitkommazahlen
+		"formatFloat": func(value float64, decimals int) string {
+			format := "%." + strconv.Itoa(decimals) + "f"
+			return fmt.Sprintf(format, value)
+		},
+		"formatPrice": func(price float64) string {
+			if price <= 0 {
+				return "-"
+			}
+			return fmt.Sprintf("%.2f €", price)
+		},
+		"formatWeight": func(weight float64) string {
+			if weight <= 0 {
+				return "-"
+			}
+			return fmt.Sprintf("%.3f kg", weight)
+		},
+		"formatStock": func(stock float64, unit string) string {
+			return fmt.Sprintf("%.2f %s", stock, unit)
+		},
+		"formatFloatWithUnit": func(value float64, unit string) string {
+			if value <= 0 {
+				return "0 " + unit
+			}
+			return fmt.Sprintf("%.2f %s", value, unit)
+		},
+		"isLowStock": func(current, minimum float64) bool {
+			return current <= minimum && minimum > 0
+		},
+		"floatLt": func(a, b float64) bool {
+			return a < b
+		},
+		"floatLte": func(a, b float64) bool {
+			return a <= b
+		},
+		"floatGt": func(a, b float64) bool {
+			return a > b
+		},
+		"floatGte": func(a, b float64) bool {
+			return a >= b
+		},
 	}
 }

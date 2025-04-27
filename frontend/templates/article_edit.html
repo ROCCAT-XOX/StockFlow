@@ -1,6 +1,6 @@
 <!-- frontend/templates/article_edit.html -->
 {{ template "head" . }}
-<body class="bg-[#F5F5DC] min-h-screen flex flex-col">
+<body class="bg-gray-50 min-h-screen flex flex-col">
 <!-- Navigation -->
 {{ template "navigation" . }}
 
@@ -13,7 +13,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
             </a>
-            <h1 class="text-2xl font-bold text-[#333333]">Artikel bearbeiten</h1>
+            <h1 class="text-2xl font-bold text-gray-900">Artikel bearbeiten</h1>
         </div>
     </div>
 
@@ -22,78 +22,106 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Grunddaten -->
                 <div class="col-span-2">
-                    <h3 class="text-lg font-medium text-[#333333] mb-4">Grunddaten</h3>
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Grunddaten</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label for="articleNumber" class="block text-sm font-medium text-gray-700">Artikelnummer*</label>
-                            <input type="text" name="articleNumber" id="articleNumber" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FF9800] focus:ring-[#FF9800]" value="{{.article.ArticleNumber}}" readonly>
+                            <input type="text" name="articleNumber" id="articleNumber" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" value="{{.article.ArticleNumber}}">
                         </div>
                         <div>
                             <label for="shortName" class="block text-sm font-medium text-gray-700">Bezeichnung kurz*</label>
-                            <input type="text" name="shortName" id="shortName" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FF9800] focus:ring-[#FF9800]" value="{{.article.ShortName}}">
+                            <input type="text" name="shortName" id="shortName" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" value="{{.article.ShortName}}">
                         </div>
                         <div>
                             <label for="ean" class="block text-sm font-medium text-gray-700">EAN</label>
-                            <input type="text" name="ean" id="ean" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FF9800] focus:ring-[#FF9800]" value="{{.article.EAN}}">
+                            <input type="text" name="ean" id="ean" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" value="{{.article.EAN}}">
                         </div>
                     </div>
                     <div class="mt-4">
                         <label for="longName" class="block text-sm font-medium text-gray-700">Beschreibung</label>
-                        <textarea name="longName" id="longName" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FF9800] focus:ring-[#FF9800]">{{.article.LongName}}</textarea>
+                        <textarea name="longName" id="longName" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">{{.article.LongName}}</textarea>
                     </div>
                 </div>
 
                 <!-- Lager & Bestand -->
                 <div class="col-span-2">
-                    <h3 class="text-lg font-medium text-[#333333] mb-4">Lager & Bestand</h3>
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Lager & Bestand</h3>
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div>
                             <label for="category" class="block text-sm font-medium text-gray-700">Warengruppe</label>
-                            <input type="text" name="category" id="category" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FF9800] focus:ring-[#FF9800]" value="{{.article.Category}}">
+                            <input type="text" name="category" id="category" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" value="{{.article.Category}}">
                         </div>
                         <div>
                             <label for="unit" class="block text-sm font-medium text-gray-700">Lagereinheit*</label>
-                            <select name="unit" id="unit" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FF9800] focus:ring-[#FF9800]">
-                                <option value="Stück" {{if eq .article.Unit "Stück"}}selected{{end}}>Stück</option>
-                                <option value="Liter" {{if eq .article.Unit "Liter"}}selected{{end}}>Liter</option>
-                                <option value="Packung" {{if eq .article.Unit "Packung"}}selected{{end}}>Packung</option>
-                            </select>
+                            <input type="text" name="unit" id="unit" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" placeholder="z.B. Stück, kg" value="{{.article.Unit}}">
                         </div>
                         <div>
                             <label for="stockCurrent" class="block text-sm font-medium text-gray-700">Aktueller Bestand*</label>
-                            <input type="number" name="stockCurrent" id="stockCurrent" step="0.001" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FF9800] focus:ring-[#FF9800]" value="{{.article.StockCurrent}}">
+                            <input type="number" name="stockCurrent" id="stockCurrent" step="0.001" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" value="{{.article.StockCurrent}}">
                         </div>
                         <div>
                             <label for="minimumStock" class="block text-sm font-medium text-gray-700">Mindestbestand</label>
-                            <input type="number" name="minimumStock" id="minimumStock" step="0.001" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FF9800] focus:ring-[#FF9800]" value="{{.article.MinimumStock}}">
+                            <input type="number" name="minimumStock" id="minimumStock" step="0.001" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" value="{{.article.MinimumStock}}">
                         </div>
                         <div>
                             <label for="stockReserved" class="block text-sm font-medium text-gray-700">Reservierter Bestand</label>
-                            <input type="number" name="stockReserved" id="stockReserved" step="0.001" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FF9800] focus:ring-[#FF9800]" value="{{.article.StockReserved}}">
+                            <input type="number" name="stockReserved" id="stockReserved" step="0.001" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" value="{{.article.StockReserved}}">
                         </div>
+                        <!-- Verbesserte Lagerortauswahl -->
                         <div>
-                            <label for="storageLocation" class="block text-sm font-medium text-gray-700">Lagerort</label>
-                            <input type="text" name="storageLocation" id="storageLocation" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FF9800] focus:ring-[#FF9800]" value="{{.article.StorageLocation}}">
+                            <label for="storageLocation" class="block text-sm font-medium text-[#333333]">Lagerort</label>
+                            <div class="mt-1 space-y-2">
+                                <!-- Hauptlager-Auswahl -->
+                                <select id="warehouseSelect" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FF9800] focus:ring-[#FF9800]">
+                                    <option value="">-- Lagerort auswählen --</option>
+                                    {{range .locationsByType.warehouses}}
+                                    <option value="{{.ID.Hex}}" {{if eq .ID.Hex $.selectedLocation.WarehouseID}}selected{{end}}>{{.Name}}</option>
+                                    {{end}}
+                                </select>
+
+                                <!-- Bereich-Auswahl -->
+                                <select id="areaSelect" class="{{if not .selectedLocation.AreaID}}hidden{{end}} block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FF9800] focus:ring-[#FF9800]">
+                                    <option value="">-- Bereich auswählen --</option>
+                                    {{range .locationsByType.areas}}
+                                    {{if eq .ParentID.Hex $.selectedLocation.WarehouseID}}
+                                    <option value="{{.ID.Hex}}" {{if eq .ID.Hex $.selectedLocation.AreaID}}selected{{end}}>{{.Name}}</option>
+                                    {{end}}
+                                    {{end}}
+                                </select>
+
+                                <!-- Fach-Auswahl -->
+                                <select id="shelfSelect" name="storageLocation" class="{{if not .selectedLocation.ShelfID}}hidden{{end}} block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FF9800] focus:ring-[#FF9800]">
+                                    <option value="">-- Fach auswählen --</option>
+                                    {{range .locationsByType.shelves}}
+                                    {{if eq .ParentID.Hex $.selectedLocation.AreaID}}
+                                    <option value="{{.ID.Hex}}" {{if eq .ID.Hex $.selectedLocation.ShelfID}}selected{{end}}>{{.Name}}</option>
+                                    {{end}}
+                                    {{end}}
+                                </select>
+
+                                <!-- Verstecktes Eingabefeld für die tatsächliche StorageLocationID -->
+                                <input type="hidden" id="storageLocationID" name="storageLocation" value="{{.article.StorageLocationID.Hex}}">
+                            </div>
                         </div>
                         <div>
                             <label for="supplierNumber" class="block text-sm font-medium text-gray-700">Lieferantennr.</label>
-                            <input type="text" name="supplierNumber" id="supplierNumber" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FF9800] focus:ring-[#FF9800]" value="{{.article.SupplierNumber}}">
+                            <input type="text" name="supplierNumber" id="supplierNumber" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" value="{{.article.SupplierNumber}}">
                         </div>
                         <div>
                             <label for="deliveryTimeInDays" class="block text-sm font-medium text-gray-700">Lieferzeit (Tage)</label>
-                            <input type="number" name="deliveryTimeInDays" id="deliveryTimeInDays" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FF9800] focus:ring-[#FF9800]" value="{{.article.DeliveryTimeInDays}}">
+                            <input type="number" name="deliveryTimeInDays" id="deliveryTimeInDays" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" value="{{.article.DeliveryTimeInDays}}">
                         </div>
                     </div>
                 </div>
 
                 <!-- Preise -->
                 <div class="col-span-2 md:col-span-1">
-                    <h3 class="text-lg font-medium text-[#333333] mb-4">Preise</h3>
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Preise</h3>
                     <div class="space-y-4">
                         <div>
                             <label for="purchasePriceNet" class="block text-sm font-medium text-gray-700">Einkaufspreis (netto)</label>
                             <div class="mt-1 relative rounded-md shadow-sm">
-                                <input type="number" name="purchasePriceNet" id="purchasePriceNet" step="0.01" class="block w-full pr-12 border-gray-300 rounded-md focus:border-[#FF9800] focus:ring-[#FF9800]" value="{{.article.PurchasePriceNet}}">
+                                <input type="number" name="purchasePriceNet" id="purchasePriceNet" step="0.01" class="block w-full pr-12 border-gray-300 rounded-md focus:border-green-500 focus:ring-green-500" value="{{.article.PurchasePriceNet}}">
                                 <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                     <span class="text-gray-500 sm:text-sm">€</span>
                                 </div>
@@ -102,7 +130,7 @@
                         <div>
                             <label for="salesPriceGross" class="block text-sm font-medium text-gray-700">Verkaufspreis (brutto)</label>
                             <div class="mt-1 relative rounded-md shadow-sm">
-                                <input type="number" name="salesPriceGross" id="salesPriceGross" step="0.01" class="block w-full pr-12 border-gray-300 rounded-md focus:border-[#FF9800] focus:ring-[#FF9800]" value="{{.article.SalesPriceGross}}">
+                                <input type="number" name="salesPriceGross" id="salesPriceGross" step="0.01" class="block w-full pr-12 border-gray-300 rounded-md focus:border-green-500 focus:ring-green-500" value="{{.article.SalesPriceGross}}">
                                 <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                     <span class="text-gray-500 sm:text-sm">€</span>
                                 </div>
@@ -113,42 +141,70 @@
 
                 <!-- Physische Eigenschaften -->
                 <div class="col-span-2 md:col-span-1">
-                    <h3 class="text-lg font-medium text-[#333333] mb-4">Physische Eigenschaften</h3>
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Physische Eigenschaften</h3>
                     <div class="space-y-4">
                         <div>
                             <label for="weightKg" class="block text-sm font-medium text-gray-700">Gewicht (kg)</label>
-                            <input type="number" name="weightKg" id="weightKg" step="0.001" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FF9800] focus:ring-[#FF9800]" value="{{.article.WeightKg}}">
+                            <input type="number" name="weightKg" id="weightKg" step="0.001" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" value="{{.article.WeightKg}}">
                         </div>
                         <div>
                             <label for="dimensions" class="block text-sm font-medium text-gray-700">Abmessungen (L×B×H in cm)</label>
-                            <input type="text" name="dimensions" id="dimensions" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FF9800] focus:ring-[#FF9800]" placeholder="z.B. 10×5×2" value="{{.article.Dimensions}}">
+                            <input type="text" name="dimensions" id="dimensions" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" placeholder="z.B. 10×5×2" value="{{.article.Dimensions}}">
                         </div>
                         <div class="flex items-center">
-                            <input type="checkbox" name="serialNumberRequired" id="serialNumberRequired" class="h-4 w-4 text-[#FF9800] focus:ring-[#FF9800] border-gray-300 rounded" {{if .article.SerialNumberRequired}}checked{{end}}>
+                            <input type="checkbox" name="serialNumberRequired" id="serialNumberRequired" class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded" {{if .article.SerialNumberRequired}}checked{{end}}>
                             <label for="serialNumberRequired" class="ml-2 block text-sm text-gray-700">Seriennummernpflichtig</label>
                         </div>
                         <div>
                             <label for="hazardClass" class="block text-sm font-medium text-gray-700">Gefahrgutklasse</label>
-                            <input type="text" name="hazardClass" id="hazardClass" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FF9800] focus:ring-[#FF9800]" value="{{.article.HazardClass}}">
+                            <input type="text" name="hazardClass" id="hazardClass" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" value="{{.article.HazardClass}}">
                         </div>
                     </div>
                 </div>
 
                 <!-- Anmerkungen -->
                 <div class="col-span-2">
-                    <h3 class="text-lg font-medium text-[#333333] mb-4">Anmerkungen</h3>
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Anmerkungen</h3>
                     <div>
                         <label for="notes" class="block text-sm font-medium text-gray-700">Bemerkungen</label>
-                        <textarea name="notes" id="notes" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FF9800] focus:ring-[#FF9800]">{{.article.Notes}}</textarea>
+                        <textarea name="notes" id="notes" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">{{.article.Notes}}</textarea>
                     </div>
                 </div>
             </div>
 
+            <!-- Im article_edit.html Formular -->
+            <form action="/articles/edit/{{.article.ID.Hex}}" method="POST" enctype="multipart/form-data" class="p-6">
+
+                <!-- Nach den bestehenden Feldern, vor dem Absenden-Button -->
+                <div class="col-span-2">
+                    <h3 class="text-lg font-medium text-[#333333] mb-4">Artikelbild</h3>
+                    <div>
+                        <label for="image" class="block text-sm font-medium text-[#333333]">Bild hochladen</label>
+                        <div class="mt-1 flex items-center">
+                            {{if .article.Images}}
+                            <div class="mr-4">
+                                <img src="{{index .article.Images 0}}" alt="{{.article.ShortName}}" class="h-20 w-20 object-cover border rounded-md">
+                            </div>
+                            {{end}}
+                            <input type="file" name="image" id="image"
+                                   class="mt-1 focus:ring-[#FF9800] focus:border-[#FF9800] block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                                   accept="image/*">
+                        </div>
+                        <p class="mt-1 text-sm text-gray-500">
+                            {{if .article.Images}}
+                            Wählen Sie ein neues Bild aus, um das bestehende zu ersetzen oder lassen Sie es leer, um das aktuelle beizubehalten.
+                            {{else}}
+                            Unterstützte Formate: JPG, PNG, GIF. Maximal 5MB.
+                            {{end}}
+                        </p>
+                    </div>
+                </div>
+
             <div class="mt-8 flex justify-end">
-                <a href="/articles" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FF9800] mr-3">
+                <a href="/articles" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 mr-3">
                     Abbrechen
                 </a>
-                <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-[#FF9800] hover:bg-[#e68a00] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FF9800]">
+                <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                     Speichern
                 </button>
             </div>
@@ -159,4 +215,119 @@
 <!-- Footer -->
 {{ template "footer" . }}
 </body>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Lagerort-Selektion verwalten
+        const warehouseSelect = document.getElementById('warehouseSelect');
+        const areaSelect = document.getElementById('areaSelect');
+        const shelfSelect = document.getElementById('shelfSelect');
+        const storageLocationInput = document.getElementById('storageLocationID');
+
+        // Hilfsfunktion zum Verstecken oder Anzeigen der Dropdowns
+        function updateSelects() {
+            // Wenn ein Lager ausgewählt ist, zeige die Bereiche dieses Lagers an
+            const warehouseId = warehouseSelect.value;
+
+            // Alle Bereiche und Fächer ausblenden, zurücksetzen und dann nur relevante anzeigen
+            areaSelect.classList.add('hidden');
+            areaSelect.innerHTML = '<option value="">-- Bereich auswählen --</option>';
+
+            shelfSelect.classList.add('hidden');
+            shelfSelect.innerHTML = '<option value="">-- Fach auswählen --</option>';
+
+            // Aktualisiere den Wert des versteckten Eingabefelds
+            storageLocationInput.value = warehouseId; // Standard: Warehouse ID
+
+            if (!warehouseId) return;
+
+            // Bereiche für dieses Lager laden
+            const areaOptions = [];
+            {{range .locationsByType.areas}}
+            if ("{{.ParentID.Hex}}" === warehouseId) {
+                areaOptions.push({
+                    id: "{{.ID.Hex}}",
+                    name: "{{.Name}}"
+                });
+            }
+            {{end}}
+
+            // Bereiche hinzufügen
+            if (areaOptions.length > 0) {
+                areaOptions.forEach(area => {
+                    const option = document.createElement('option');
+                    option.value = area.id;
+                    option.textContent = area.name;
+                    areaSelect.appendChild(option);
+                });
+                areaSelect.classList.remove('hidden');
+            }
+        }
+
+        // Event-Listener für Lagerauswahl
+        warehouseSelect.addEventListener('change', function() {
+            updateSelects();
+        });
+
+        // Event-Listener für Bereichsauswahl
+        areaSelect.addEventListener('change', function() {
+            const areaId = this.value;
+
+            // Alle Fächer ausblenden, zurücksetzen und dann nur relevante anzeigen
+            shelfSelect.classList.add('hidden');
+            shelfSelect.innerHTML = '<option value="">-- Fach auswählen --</option>';
+
+            // Aktualisiere den Wert des versteckten Eingabefelds
+            storageLocationInput.value = areaId; // Standard: Area ID
+
+            if (!areaId) return;
+
+            // Fächer für diesen Bereich laden
+            const shelfOptions = [];
+            {{range .locationsByType.shelves}}
+            if ("{{.ParentID.Hex}}" === areaId) {
+                shelfOptions.push({
+                    id: "{{.ID.Hex}}",
+                    name: "{{.Name}}"
+                });
+            }
+            {{end}}
+
+            // Fächer hinzufügen
+            if (shelfOptions.length > 0) {
+                shelfOptions.forEach(shelf => {
+                    const option = document.createElement('option');
+                    option.value = shelf.id;
+                    option.textContent = shelf.name;
+                    shelfSelect.appendChild(option);
+                });
+                shelfSelect.classList.remove('hidden');
+            }
+        });
+
+        // Event-Listener für Fachauswahl
+        shelfSelect.addEventListener('change', function() {
+            const shelfId = this.value;
+
+            // Aktualisiere den Wert des versteckten Eingabefelds
+            if (shelfId) {
+                storageLocationInput.value = shelfId;
+            } else {
+                // Wenn kein Fach ausgewählt ist, verwende die Bereichs-ID
+                storageLocationInput.value = areaSelect.value;
+            }
+        });
+
+        // Initialisierung, falls bereits Werte ausgewählt sind
+        if (warehouseSelect.options.selectedIndex > 0) {
+            // Simuliere eine Änderung, um die Abhängigkeiten zu aktualisieren
+            const event = new Event('change');
+            warehouseSelect.dispatchEvent(event);
+
+            // Wenn ein Bereich ausgewählt ist, auch dort eine Änderung simulieren
+            if (areaSelect.options.selectedIndex > 0) {
+                areaSelect.dispatchEvent(event);
+            }
+        }
+    });
+</script>
 </html>

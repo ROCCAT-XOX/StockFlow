@@ -84,7 +84,9 @@
                         </div>
                         <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                             <dt class="text-sm font-medium text-gray-500">Einkaufspreis (netto)</dt>
-                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{if gt .article.PurchasePriceNet 0}}{{.article.PurchasePriceNet}} €{{else}}-{{end}}</dd>
+                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                {{formatPrice .article.PurchasePriceNet}}
+                            </dd>
                         </div>
                     </dl>
                 </div>
@@ -99,7 +101,9 @@
                     <dl>
                         <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                             <dt class="text-sm font-medium text-gray-500">Gewicht</dt>
-                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{if gt .article.WeightKg 0}}{{.article.WeightKg}} kg{{else}}-{{end}}</dd>
+                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                {{formatWeight .article.WeightKg}}
+                            </dd>
                         </div>
                         <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                             <dt class="text-sm font-medium text-gray-500">Abmessungen</dt>
@@ -140,25 +144,32 @@
                         <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                             <dt class="text-sm font-medium text-gray-500">Aktueller Bestand</dt>
                             <dd class="mt-1 text-sm font-bold text-gray-900 sm:mt-0 sm:col-span-2">
-                                {{if lt .article.StockCurrent .article.MinimumStock}}
-                                <span class="text-red-600">{{.article.StockCurrent}} {{.article.Unit}}</span>
+                                {{if isLowStock .article.StockCurrent .article.MinimumStock}}
+                                <span class="text-red-600">{{formatFloatWithUnit .article.StockCurrent .article.Unit}}</span>
                                 {{else}}
-                                <span class="text-green-600">{{.article.StockCurrent}} {{.article.Unit}}</span>
+                                <span class="text-green-600">{{formatFloatWithUnit .article.StockCurrent .article.Unit}}</span>
                                 {{end}}
                             </dd>
                         </div>
                         <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                             <dt class="text-sm font-medium text-gray-500">Reserviert</dt>
-                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{if gt .article.StockReserved 0}}{{.article.StockReserved}} {{.article.Unit}}{{else}}0 {{.article.Unit}}{{end}}</dd>
+                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                {{formatFloatWithUnit .article.StockReserved .article.Unit}}
+                            </dd>
                         </div>
                         <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                             <dt class="text-sm font-medium text-gray-500">Verfügbar</dt>
-                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{sub .article.StockCurrent .article.StockReserved}} {{.article.Unit}}</dd>
+                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                {{formatFloatWithUnit (sub .article.StockCurrent .article.StockReserved) .article.Unit}}
+                            </dd>
                         </div>
                         <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                             <dt class="text-sm font-medium text-gray-500">Mindestbestand</dt>
-                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{if gt .article.MinimumStock 0}}{{.article.MinimumStock}} {{.article.Unit}}{{else}}0 {{.article.Unit}}{{end}}</dd>
+                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                {{formatFloatWithUnit .article.MinimumStock .article.Unit}}
+                            </dd>
                         </div>
+                        <!-- In der article_detail.html -->
                         <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                             <dt class="text-sm font-medium text-[#333333]">Lagerort</dt>
                             <dd class="mt-1 text-sm text-[#333333] sm:mt-0 sm:col-span-2">
@@ -178,11 +189,13 @@
                     <dl>
                         <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                             <dt class="text-sm font-medium text-gray-500">Einkaufspreis (netto)</dt>
-                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{if gt .article.PurchasePriceNet 0}}{{.article.PurchasePriceNet}} €{{else}}-{{end}}</dd>
+                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{formatPrice .article.PurchasePriceNet}}</dd>
                         </div>
                         <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                             <dt class="text-sm font-medium text-gray-500">Verkaufspreis (brutto)</dt>
-                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{if gt .article.SalesPriceGross 0}}{{.article.SalesPriceGross}} €{{else}}-{{end}}</dd>
+                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                {{formatPrice .article.SalesPriceGross}}
+                            </dd>
                         </div>
                     </dl>
                 </div>

@@ -280,7 +280,6 @@ func (h *ArticleHandler) ShowStockOverview(c *gin.Context) {
 }
 
 // GetArticleDetails zeigt die Details eines Artikels an
-// Im ArticleHandler.GetArticleDetails
 func (h *ArticleHandler) GetArticleDetails(c *gin.Context) {
 	id := c.Param("id")
 
@@ -299,11 +298,48 @@ func (h *ArticleHandler) GetArticleDetails(c *gin.Context) {
 	user, _ := c.Get("user")
 	userModel := user.(*model.User)
 
-	// Wenn die Lagerort-ID gesetzt ist, laden wir den vollständigen Pfad
+	// Lagerort-Information laden
 	var locationPath string
 	if !article.StorageLocationID.IsZero() {
 		locationRepo := repository.NewLocationRepository()
-		locationPath, _ = locationRepo.GetLocationPath(article.StorageLocationID.Hex())
+		location, err := locationRepo.FindByID(article.StorageLocationID.Hex())
+		if err == nil {
+			// Vollständigen Pfad ermitteln
+			locationTree, _ := locationRepo.BuildLocationTree()
+			if location.Type == model.LocationTypeShelf {
+				// Für ein Fach den kompletten Pfad holen
+				var parentArea *model.Location
+				var parentWarehouse *model.Location
+
+				// Bereich (Parent) finden
+				if parent, exists := locationTree[location.ParentID]; exists {
+					parentArea = parent
+					// Lager (Großeltern) finden
+					if grandparent, exists := locationTree[parent.ParentID]; exists {
+						parentWarehouse = grandparent
+					}
+				}
+
+				if parentWarehouse != nil && parentArea != nil {
+					locationPath = parentWarehouse.Name + " > " + parentArea.Name + " > " + location.Name
+				} else {
+					locationPath = location.Name
+				}
+			} else if location.Type == model.LocationTypeArea {
+				// Für einen Bereich den Pfad mit Parent
+				if parent, exists := locationTree[location.ParentID]; exists {
+					locationPath = parent.Name + " > " + location.Name
+				} else {
+					locationPath = location.Name
+				}
+			} else {
+				// Für ein Hauptlager nur den Namen
+				locationPath = location.Name
+			}
+		}
+	} else if article.StorageLocation != "" {
+		// Fallback auf das alte StorageLocation-Feld
+		locationPath = article.StorageLocation
 	}
 
 	// Daten an das Template übergeben
@@ -338,12 +374,6 @@ func (h *ArticleHandler) ShowEditArticleForm(c *gin.Context) {
 	user, _ := c.Get("user")
 	userModel := user.(*model.User)
 
-	// Lieferanten für Dropdown abrufen
-	suppliers, err := h.supplierRepo.FindAll()
-	if err != nil {
-		suppliers = []*model.Supplier{} // Leere Liste im Fehlerfall
-	}
-
 	// Lagerorte laden
 	locationRepo := repository.NewLocationRepository()
 	locations, err := locationRepo.FindAll()
@@ -351,19 +381,65 @@ func (h *ArticleHandler) ShowEditArticleForm(c *gin.Context) {
 		locations = []*model.Location{} // Leere Liste im Fehlerfall
 	}
 
-	// Lagerorte nach Typ und Parent-ID gruppieren
-	warehouseLocations := make([]*model.Location, 0)
-	areaLocations := make([]*model.Location, 0)
-	shelfLocations := make([]*model.Location, 0)
+	// Lagerorte nach Typ gruppieren
+	var warehouses []*model.Location
+	var areas []*model.Location
+	var shelves []*model.Location
 
 	for _, loc := range locations {
 		switch loc.Type {
 		case model.LocationTypeWarehouse:
-			warehouseLocations = append(warehouseLocations, loc)
+			warehouses = append(warehouses, loc)
 		case model.LocationTypeArea:
-			areaLocations = append(areaLocations, loc)
+			areas = append(areas, loc)
 		case model.LocationTypeShelf:
-			shelfLocations = append(shelfLocations, loc)
+			shelves = append(shelves, loc)
+		}
+	}
+
+	// Aktuelle Lagerorthierarchie ermitteln, falls vorhanden
+	selectedLocationInfo := struct {
+		WarehouseID string
+		AreaID      string
+		ShelfID     string
+	}{}
+
+	if !article.StorageLocationID.IsZero() {
+		// Direkt ausgewählten Lagerort finden
+		for _, loc := range locations {
+			if loc.ID == article.StorageLocationID {
+				// Je nach Typ des Lagerorts die entsprechenden IDs setzen
+				switch loc.Type {
+				case model.LocationTypeShelf:
+					selectedLocationInfo.ShelfID = loc.ID.Hex()
+					// Parent (Area) finden
+					for _, area := range areas {
+						if area.ID == loc.ParentID {
+							selectedLocationInfo.AreaID = area.ID.Hex()
+							// Grandparent (Warehouse) finden
+							for _, warehouse := range warehouses {
+								if warehouse.ID == area.ParentID {
+									selectedLocationInfo.WarehouseID = warehouse.ID.Hex()
+									break
+								}
+							}
+							break
+						}
+					}
+				case model.LocationTypeArea:
+					selectedLocationInfo.AreaID = loc.ID.Hex()
+					// Parent (Warehouse) finden
+					for _, warehouse := range warehouses {
+						if warehouse.ID == loc.ParentID {
+							selectedLocationInfo.WarehouseID = warehouse.ID.Hex()
+							break
+						}
+					}
+				case model.LocationTypeWarehouse:
+					selectedLocationInfo.WarehouseID = loc.ID.Hex()
+				}
+				break
+			}
 		}
 	}
 
@@ -375,13 +451,13 @@ func (h *ArticleHandler) ShowEditArticleForm(c *gin.Context) {
 		"year":      time.Now().Year(),
 		"article":   article,
 		"userRole":  c.GetString("userRole"),
-		"suppliers": suppliers,
 		"locations": locations,
-		"locationsByParent": map[string][]*model.Location{
-			"warehouse": warehouseLocations,
-			"area":      areaLocations,
-			"shelf":     shelfLocations,
+		"locationsByType": gin.H{
+			"warehouses": warehouses,
+			"areas":      areas,
+			"shelves":    shelves,
 		},
+		"selectedLocation": selectedLocationInfo,
 	})
 }
 
