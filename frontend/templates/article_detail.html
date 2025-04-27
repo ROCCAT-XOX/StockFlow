@@ -21,6 +21,14 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <!-- Linke Spalte - Hauptinformationen -->
         <div class="md:col-span-2 space-y-6">
+
+            {{if .article.Images}}
+            <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+                <div class="p-4">
+                    <img src="{{index .article.Images 0}}" alt="{{.article.ShortName}}" class="max-h-80 mx-auto object-contain">
+                </div>
+            </div>
+            {{end}}
             <!-- Artikeldetails -->
             <div class="bg-white shadow overflow-hidden sm:rounded-lg">
                 <div class="px-4 py-5 sm:px-6 flex justify-between items-center">

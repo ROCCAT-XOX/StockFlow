@@ -63,6 +63,9 @@ func (h *ArticleHandler) ShowAddArticleForm(c *gin.Context) {
 	user, _ := c.Get("user")
 	userModel := user.(*model.User)
 
+	// Nächste Artikelnummer generieren (für Formularvorausfüllung)
+	nextArticleNumber, _ := h.articleRepo.GetNextArticleNumber()
+
 	// Lieferanten für Dropdown abrufen
 	suppliers, err := h.supplierRepo.FindAll()
 	if err != nil {
@@ -70,13 +73,14 @@ func (h *ArticleHandler) ShowAddArticleForm(c *gin.Context) {
 	}
 
 	c.HTML(http.StatusOK, "article_add.html", gin.H{
-		"title":     "Artikel hinzufügen",
-		"active":    "articles",
-		"user":      userModel.FirstName + " " + userModel.LastName,
-		"email":     userModel.Email,
-		"year":      time.Now().Year(),
-		"userRole":  c.GetString("userRole"),
-		"suppliers": suppliers,
+		"title":             "Artikel hinzufügen",
+		"active":            "articles",
+		"user":              userModel.FirstName + " " + userModel.LastName,
+		"email":             userModel.Email,
+		"year":              time.Now().Year(),
+		"userRole":          c.GetString("userRole"),
+		"suppliers":         suppliers,
+		"nextArticleNumber": nextArticleNumber,
 	})
 }
 
@@ -119,7 +123,7 @@ func (h *ArticleHandler) AddArticle(c *gin.Context) {
 
 	// Neuen Artikel erstellen
 	article := &model.Article{
-		ArticleNumber:         articleNumber,
+		ArticleNumber:         articleNumber, // Wird automatisch überschrieben, wenn bereits vorhanden oder leer
 		ShortName:             shortName,
 		LongName:              longName,
 		EAN:                   ean,

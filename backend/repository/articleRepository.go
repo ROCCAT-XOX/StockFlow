@@ -3,6 +3,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"StockFlow/backend/db"
@@ -26,18 +27,80 @@ func NewArticleRepository() *ArticleRepository {
 	}
 }
 
+// getNextArticleNumber erzeugt eine neue fortlaufende Artikelnummer
+func (r *ArticleRepository) GetNextArticleNumber() (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Optionen für die Sortierung nach Artikelnummer (absteigend)
+	opts := options.Find().
+		SetSort(bson.D{{Key: "articleNumber", Value: -1}}).
+		SetLimit(1)
+
+	// Einen Artikel mit der höchsten Artikelnummer finden
+	var articles []*model.Article
+	cursor, err := r.collection.Find(ctx, bson.M{}, opts)
+	if err != nil {
+		return "", err
+	}
+	defer cursor.Close(ctx)
+
+	for cursor.Next(ctx) {
+		var article model.Article
+		if err := cursor.Decode(&article); err != nil {
+			return "", err
+		}
+		articles = append(articles, &article)
+	}
+
+	// Wenn keine Artikel gefunden wurden, mit A1000 beginnen
+	if len(articles) == 0 {
+		return "A1000", nil
+	}
+
+	// Sonst die höchste Artikelnummer inkrementieren
+	highestArticle := articles[0]
+	var prefix string
+	var number int
+
+	// Formatierung prüfen und Nummer extrahieren
+	_, err = fmt.Sscanf(highestArticle.ArticleNumber, "%1s%d", &prefix, &number)
+	if err != nil || prefix != "A" {
+		// Wenn das Format nicht dem erwarteten entspricht, mit A1000 beginnen
+		return "A1000", nil
+	}
+
+	// Nächste Nummer generieren
+	nextNumber := number + 1
+	return fmt.Sprintf("A%d", nextNumber), nil
+}
+
 // Create erstellt einen neuen Artikel
 func (r *ArticleRepository) Create(article *model.Article) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	// Prüfen, ob bereits ein Artikel mit dieser Artikelnummer existiert
-	count, err := r.collection.CountDocuments(ctx, bson.M{"articleNumber": article.ArticleNumber})
-	if err != nil {
-		return err
-	}
-	if count > 0 {
-		return mongo.ErrNoDocuments // Fehlertyp hier nicht optimal, aber einfach zu erkennen
+	// Wenn keine Artikelnummer angegeben ist, automatisch eine erzeugen
+	if article.ArticleNumber == "" {
+		nextNumber, err := r.GetNextArticleNumber()
+		if err != nil {
+			return err
+		}
+		article.ArticleNumber = nextNumber
+	} else {
+		// Prüfen, ob bereits ein Artikel mit dieser Artikelnummer existiert
+		count, err := r.collection.CountDocuments(ctx, bson.M{"articleNumber": article.ArticleNumber})
+		if err != nil {
+			return err
+		}
+		if count > 0 {
+			// Wenn bereits ein Artikel mit dieser Nummer existiert, automatisch eine neue erzeugen
+			nextNumber, err := r.GetNextArticleNumber()
+			if err != nil {
+				return err
+			}
+			article.ArticleNumber = nextNumber
+		}
 	}
 
 	// Standardwerte setzen für fehlende Zeitstempel

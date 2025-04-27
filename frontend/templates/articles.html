@@ -46,7 +46,7 @@
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-[#333333] uppercase tracking-wider">Bezeichnung</th>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-[#333333] uppercase tracking-wider">Kategorie</th>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-[#333333] uppercase tracking-wider">Bestand</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-[#333333] uppercase tracking-wider">Verkaufspreis</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-[#333333] uppercase tracking-wider">Einkaufspreis</th>
                 <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-[#333333] uppercase tracking-wider">Aktionen</th>
             </tr>
             </thead>
@@ -75,7 +75,7 @@
                     {{end}}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {{if .SalesPriceGross}}{{.SalesPriceGross}} €{{else}}-{{end}}
+                    {{if .PurchasePriceNet}}{{.PurchasePriceNet}} €{{else}}-{{end}}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <a href="/articles/view/{{.ID.Hex}}" class="text-blue-600 hover:text-blue-900 mr-3">Details</a>
