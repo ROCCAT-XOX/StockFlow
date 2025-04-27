@@ -26,8 +26,12 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label for="articleNumber" class="block text-sm font-medium text-gray-700">Artikelnummer*</label>
-                            <input type="text" name="articleNumber" id="articleNumber" readonly class="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 shadow-sm focus:border-[#FF9800] focus:ring-[#FF9800]" value="{{.nextArticleNumber}}">
-                            <p class="mt-1 text-xs text-gray-500">Wird automatisch vergeben</p>
+                            <input type="text" name="articleNumber" id="articleNumber" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FF9800] focus:ring-[#FF9800]" value="{{.nextArticleNumber}}" {{if .nextArticleNumber}}readonly{{end}}>
+                            {{if .nextArticleNumber}}
+                            <p class="mt-1 text-xs text-gray-500">Automatisch generierte Nummer</p>
+                            {{else}}
+                            <p class="mt-1 text-xs text-gray-500">Bitte geben Sie eine eindeutige Artikelnummer ein</p>
+                            {{end}}
                         </div>
                         <div>
                             <label for="shortName" class="block text-sm font-medium text-gray-700">Bezeichnung kurz*</label>
@@ -74,26 +78,27 @@
                         </div>
                         <div>
                             <label for="storageLocation" class="block text-sm font-medium text-[#333333]">Lagerort</label>
-                            <select name="storageLocation" id="storageLocation" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FF9800] focus:ring-[#FF9800]">
-                                <option value="">-- Bitte wählen --</option>
-                                {{range .locations}}
-                                {{if eq .Type "warehouse"}}
-                                <optgroup label="{{.Name}}">
-                                    {{range $.locationsByParent.warehouse}}
-                                    {{if eq .ParentID.Hex $.ID.Hex}}
-                                <optgroup label="&nbsp;&nbsp;{{.Name}}">
-                                    {{range $.locationsByParent.area}}
-                                    {{if eq .ParentID.Hex $.ID.Hex}}
-                                    <option value="{{.ID.Hex}}">{{$.Name}} > {{.Name}} > {{$.Name}}</option>
+                            <div class="mt-1 space-y-2">
+                                <!-- Hauptlager-Auswahl -->
+                                <select id="warehouseSelect" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FF9800] focus:ring-[#FF9800]">
+                                    <option value="">-- Lagerort auswählen --</option>
+                                    {{range .locations}}
+                                    {{if eq .Type "warehouse"}}
+                                    <option value="{{.ID.Hex}}">{{.Name}}</option>
                                     {{end}}
                                     {{end}}
-                                </optgroup>
-                                {{end}}
-                                {{end}}
-                                </optgroup>
-                                {{end}}
-                                {{end}}
-                            </select>
+                                </select>
+
+                                <!-- Bereich-Auswahl, wird dynamisch gefüllt -->
+                                <select id="areaSelect" class="hidden block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FF9800] focus:ring-[#FF9800]">
+                                    <option value="">-- Bereich auswählen --</option>
+                                </select>
+
+                                <!-- Fach-Auswahl, wird dynamisch gefüllt -->
+                                <select id="shelfSelect" name="storageLocation" class="hidden block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FF9800] focus:ring-[#FF9800]">
+                                    <option value="">-- Fach auswählen --</option>
+                                </select>
+                            </div>
                         </div>
                         <div>
                             <label for="supplierNumber" class="block text-sm font-medium text-gray-700">Lieferantennr.</label>
@@ -179,4 +184,116 @@
 <!-- Footer -->
 {{ template "footer" . }}
 </body>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Lagerort-Selektion verwalten
+        const warehouseSelect = document.getElementById('warehouseSelect');
+        const areaSelect = document.getElementById('areaSelect');
+        const shelfSelect = document.getElementById('shelfSelect');
+
+        // Wenn ein Lagerort ausgewählt wird, lade die zugehörigen Bereiche
+        warehouseSelect.addEventListener('change', function() {
+            const warehouseId = this.value;
+
+            // Bereiche und Fächer zurücksetzen
+            resetAreaAndShelf();
+
+            if (warehouseId) {
+                // Bereiche für diesen Lagerort laden
+                fetchAreas(warehouseId);
+            }
+        });
+
+        // Wenn ein Bereich ausgewählt wird, lade die zugehörigen Fächer
+        areaSelect.addEventListener('change', function() {
+            const areaId = this.value;
+
+            // Fächer zurücksetzen
+            resetShelf();
+
+            if (areaId) {
+                // Fächer für diesen Bereich laden
+                fetchShelves(areaId);
+            }
+        });
+
+        // Hilfsfunktionen
+        function resetAreaAndShelf() {
+            // Bereich-Dropdown leeren und verstecken
+            areaSelect.innerHTML = '<option value="">-- Bereich auswählen --</option>';
+            areaSelect.classList.add('hidden');
+
+            // Fach-Dropdown leeren und verstecken
+            resetShelf();
+        }
+
+        function resetShelf() {
+            shelfSelect.innerHTML = '<option value="">-- Fach auswählen --</option>';
+            shelfSelect.classList.add('hidden');
+        }
+
+        function fetchAreas(warehouseId) {
+            // Hier würden wir normalerweise einen AJAX-Call machen
+            // Da die Daten bereits in unserem HTML sind, können wir sie filtern
+
+            // Bereiche aus den Template-Daten extrahieren
+            const areas = [];
+            {{range .locations}}
+            {{if eq .Type "area"}}
+            areas.push({
+                id: "{{.ID.Hex}}",
+                name: "{{.Name}}",
+                parentId: "{{.ParentID.Hex}}"
+            });
+            {{end}}
+            {{end}}
+
+            // Bereiche filtern, die zu diesem Lagerort gehören
+            const filteredAreas = areas.filter(area => area.parentId === warehouseId);
+
+            // Bereich-Dropdown aktualisieren
+            if (filteredAreas.length > 0) {
+                filteredAreas.forEach(area => {
+                    const option = document.createElement('option');
+                    option.value = area.id;
+                    option.textContent = area.name;
+                    areaSelect.appendChild(option);
+                });
+
+                // Bereich-Dropdown anzeigen
+                areaSelect.classList.remove('hidden');
+            }
+        }
+
+        function fetchShelves(areaId) {
+            // Fächer aus den Template-Daten extrahieren
+            const shelves = [];
+            {{range .locations}}
+            {{if eq .Type "shelf"}}
+            shelves.push({
+                id: "{{.ID.Hex}}",
+                name: "{{.Name}}",
+                parentId: "{{.ParentID.Hex}}"
+            });
+            {{end}}
+            {{end}}
+
+            // Fächer filtern, die zu diesem Bereich gehören
+            const filteredShelves = shelves.filter(shelf => shelf.parentId === areaId);
+
+            // Fach-Dropdown aktualisieren
+            if (filteredShelves.length > 0) {
+                filteredShelves.forEach(shelf => {
+                    const option = document.createElement('option');
+                    option.value = shelf.id;
+                    option.textContent = shelf.name;
+                    shelfSelect.appendChild(option);
+                });
+
+                // Fach-Dropdown anzeigen
+                shelfSelect.classList.remove('hidden');
+            }
+        }
+    });
+</script>
 </html>

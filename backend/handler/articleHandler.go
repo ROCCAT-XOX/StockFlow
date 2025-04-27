@@ -63,6 +63,12 @@ func (h *ArticleHandler) ShowAddArticleForm(c *gin.Context) {
 	user, _ := c.Get("user")
 	userModel := user.(*model.User)
 
+	// Nächste Artikelnummer generieren
+	nextArticleNumber, err := h.articleRepo.GetNextArticleNumber()
+	if err != nil {
+		nextArticleNumber = "" // Im Fehlerfall leeren String verwenden
+	}
+
 	// Lieferanten für Dropdown abrufen
 	suppliers, err := h.supplierRepo.FindAll()
 	if err != nil {
@@ -76,36 +82,16 @@ func (h *ArticleHandler) ShowAddArticleForm(c *gin.Context) {
 		locations = []*model.Location{} // Leere Liste im Fehlerfall
 	}
 
-	// Lagerorte nach Typ und Parent-ID gruppieren
-	warehouseLocations := make([]*model.Location, 0)
-	areaLocations := make([]*model.Location, 0)
-	shelfLocations := make([]*model.Location, 0)
-
-	for _, loc := range locations {
-		switch loc.Type {
-		case model.LocationTypeWarehouse:
-			warehouseLocations = append(warehouseLocations, loc)
-		case model.LocationTypeArea:
-			areaLocations = append(areaLocations, loc)
-		case model.LocationTypeShelf:
-			shelfLocations = append(shelfLocations, loc)
-		}
-	}
-
 	c.HTML(http.StatusOK, "article_add.html", gin.H{
-		"title":     "Artikel hinzufügen",
-		"active":    "articles",
-		"user":      userModel.FirstName + " " + userModel.LastName,
-		"email":     userModel.Email,
-		"year":      time.Now().Year(),
-		"userRole":  c.GetString("userRole"),
-		"suppliers": suppliers,
-		"locations": locations,
-		"locationsByParent": map[string][]*model.Location{
-			"warehouse": warehouseLocations,
-			"area":      areaLocations,
-			"shelf":     shelfLocations,
-		},
+		"title":             "Artikel hinzufügen",
+		"active":            "articles",
+		"user":              userModel.FirstName + " " + userModel.LastName,
+		"email":             userModel.Email,
+		"year":              time.Now().Year(),
+		"userRole":          c.GetString("userRole"),
+		"suppliers":         suppliers,
+		"locations":         locations,
+		"nextArticleNumber": nextArticleNumber, // Automatisch generierte Artikelnummer
 	})
 }
 
